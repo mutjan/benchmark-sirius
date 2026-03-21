@@ -1350,7 +1350,6 @@ function renderLeaderboard(bm, sortedResults) {
             ${escHtml(tier.label)}
           </span>
         </td>
-        <td><div class="q-dots">${dotHtml}</div></td>
       </tr>`;
   }).join('');
 
@@ -1364,7 +1363,6 @@ function renderLeaderboard(bm, sortedResults) {
           <th>测试时间</th>
           <th>总分 / ${bm.total_points}</th>
           <th>级别</th>
-          <th>各题得分</th>
         </tr>
       </thead>
       <tbody>${rows}</tbody>
