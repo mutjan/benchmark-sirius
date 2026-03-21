@@ -534,6 +534,213 @@
     }
     .dim-chip strong { color: var(--text); font-weight: 600; }
 
+    /* ── Q-card expandable answer ─────────────────── */
+    .q-card { cursor: pointer; }
+    .q-card.expanded { border-color: var(--border-glow); }
+    .q-expand-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--sirius);
+      opacity: .7;
+      transition: opacity .2s;
+      user-select: none;
+    }
+    .q-card:hover .q-expand-btn { opacity: 1; }
+    .q-expand-icon {
+      display: inline-block;
+      transition: transform .2s;
+      font-style: normal;
+    }
+    .q-card.expanded .q-expand-icon { transform: rotate(90deg); }
+    .q-detail-drawer {
+      display: none;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+    .q-card.expanded .q-detail-drawer { display: block; }
+    .q-prompt-block {
+      margin-bottom: 10px;
+    }
+    .q-block-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .07em;
+      color: var(--text-3);
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .q-prompt-text {
+      font-size: 12px;
+      line-height: 1.7;
+      color: var(--text-2);
+      background: rgba(127,179,255,.04);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--sirius);
+      border-radius: 0 6px 6px 0;
+      padding: 8px 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .q-answer-text {
+      font-size: 12px;
+      line-height: 1.75;
+      color: var(--text-2);
+      background: rgba(255,255,255,.02);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .q-snippet {
+      margin-top: 8px;
+      font-size: 11px;
+      line-height: 1.6;
+      color: var(--text);
+      background: rgba(192,132,252,.12);
+      border: 1px solid rgba(192,132,252,.3);
+      border-radius: 5px;
+      padding: 6px 10px;
+    }
+    .q-snippet::before {
+      content: '▸ 关键片段：';
+      font-weight: 700;
+      color: rgba(192,132,252,.9);
+      margin-right: 4px;
+    }
+    .q-no-answer {
+      font-size: 12px;
+      color: var(--text-3);
+      font-style: italic;
+      padding: 6px 0;
+    }
+
+    /* ── Prompt modal overlay ─────────────────────── */
+    .prompt-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.7);
+      backdrop-filter: blur(6px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s;
+    }
+    .prompt-modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .prompt-modal {
+      background: var(--surface);
+      border: 1px solid var(--border-glow);
+      border-radius: calc(var(--r) * 1.5);
+      box-shadow: 0 0 60px rgba(127,179,255,.15), 0 24px 48px rgba(0,0,0,.5);
+      width: 100%;
+      max-width: 680px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .prompt-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .prompt-modal-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .prompt-modal-meta {
+      font-size: 11px;
+      color: var(--text-3);
+      margin-top: 3px;
+    }
+    .prompt-modal-close {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-2);
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .2s, color .2s;
+      flex-shrink: 0;
+    }
+    .prompt-modal-close:hover { background: var(--surface-3); color: var(--text); }
+    .prompt-modal-body {
+      padding: 20px 22px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .prompt-modal-prompt {
+      font-size: 13px;
+      line-height: 1.8;
+      color: var(--text-2);
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: rgba(127,179,255,.04);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--sirius);
+      border-radius: 0 8px 8px 0;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+    .prompt-modal-answer-header {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 8px;
+      margin-top: 4px;
+    }
+    .prompt-modal-answer {
+      font-size: 13px;
+      line-height: 1.8;
+      color: var(--text-2);
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: rgba(255,255,255,.02);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .prompt-modal-snippet {
+      margin-top: 12px;
+      font-size: 12px;
+      line-height: 1.7;
+      color: var(--text);
+      background: rgba(192,132,252,.12);
+      border: 1px solid rgba(192,132,252,.3);
+      border-radius: 6px;
+      padding: 10px 14px;
+    }
+    .prompt-modal-snippet::before {
+      content: '▸ 关键得分片段：';
+      font-weight: 700;
+      color: rgba(192,132,252,.9);
+      display: block;
+      margin-bottom: 4px;
+      font-size: 11px;
+    }
+
     /* ── Empty / loading state ────────────────────── */
     .empty-state {
       text-align: center;
@@ -1030,8 +1237,34 @@ function renderDetail(bm, res, allResults) {
         ? 'linear-gradient(90deg, rgba(192,132,252,.6), rgba(192,132,252,.9))'
         : 'rgba(100,116,139,.3)';
     const boxGlow = s >= q.max ? `0 0 8px ${color.stroke}60` : 'none';
+    const answer = res.answers?.[q.id];
+    const hasAnswer = answer && answer.text;
+    const hasPrompt = q.prompt;
+    const hasExpandable = hasAnswer || hasPrompt;
+
+    const drawerHtml = hasExpandable ? `
+      <div class="q-detail-drawer">
+        ${hasPrompt ? `
+        <div class="q-prompt-block">
+          <div class="q-block-label">测评提示词</div>
+          <div class="q-prompt-text">${escHtml(q.prompt)}</div>
+        </div>` : ''}
+        <div>
+          <div class="q-block-label">模型回答</div>
+          ${hasAnswer
+            ? `<div class="q-answer-text">${escHtml(answer.text)}</div>
+               ${answer.snippet ? `<div class="q-snippet">${escHtml(answer.snippet)}</div>` : ''}`
+            : `<div class="q-no-answer">（暂无原始回答记录）</div>`
+          }
+        </div>
+      </div>` : '';
+
+    const expandBtnHtml = hasExpandable
+      ? `<div class="q-expand-btn"><i class="q-expand-icon">▶</i> 查看提示词与回答</div>`
+      : '';
+
     return `
-      <div class="q-card">
+      <div class="q-card" onclick="this.classList.toggle('expanded')">
         <div class="q-card-header">
           <div>
             <span class="q-id">${q.id}</span>
@@ -1046,6 +1279,8 @@ function renderDetail(bm, res, allResults) {
           <div class="q-progress-fill" style="width:${pct}%;background:${colorFill}"></div>
         </div>
         <span class="q-dimension-tag">${escHtml(dimLabel)}</span>
+        ${expandBtnHtml}
+        ${drawerHtml}
       </div>`;
   }).join('');
 
@@ -1155,6 +1390,53 @@ async function main() {
 }
 
 main();
+</script>
+
+<!-- Prompt detail modal -->
+<div class="prompt-modal-backdrop" id="prompt-modal-backdrop" onclick="closePromptModal(event)">
+  <div class="prompt-modal" id="prompt-modal">
+    <div class="prompt-modal-header">
+      <div>
+        <div class="prompt-modal-title" id="pmodal-title">—</div>
+        <div class="prompt-modal-meta" id="pmodal-meta">—</div>
+      </div>
+      <button class="prompt-modal-close" onclick="closePromptModal(null)" aria-label="关闭">✕</button>
+    </div>
+    <div class="prompt-modal-body" id="pmodal-body"></div>
+  </div>
+</div>
+
+<script>
+function openPromptModal(qId, questionTitle, promptText, modelName, answerText, snippetText) {
+  const backdrop = document.getElementById('prompt-modal-backdrop');
+  document.getElementById('pmodal-title').textContent = `${qId} · ${questionTitle}`;
+  document.getElementById('pmodal-meta').textContent = modelName ? `模型：${modelName}` : '测评题目详情';
+  const body = document.getElementById('pmodal-body');
+  const snippetHtml = snippetText
+    ? `<div class="prompt-modal-snippet">${escHtml(snippetText)}</div>`
+    : '';
+  const answerHtml = answerText
+    ? `<div class="prompt-modal-answer-header">模型原始回答</div>
+       <div class="prompt-modal-answer">${escHtml(answerText)}</div>
+       ${snippetHtml}`
+    : `<div class="prompt-modal-answer-header">模型原始回答</div>
+       <div style="font-size:13px;color:var(--text-3);font-style:italic;padding:8px 0">（暂无原始回答记录）</div>`;
+  body.innerHTML = `
+    <div class="prompt-modal-answer-header" style="margin-bottom:8px">测评提示词</div>
+    <div class="prompt-modal-prompt">${escHtml(promptText || '（无提示词）')}</div>
+    ${answerHtml}
+  `;
+  backdrop.classList.add('open');
+}
+
+function closePromptModal(e) {
+  if (e && e.target !== document.getElementById('prompt-modal-backdrop')) return;
+  document.getElementById('prompt-modal-backdrop').classList.remove('open');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closePromptModal(null);
+});
 </script>
 </body>
 </html>
