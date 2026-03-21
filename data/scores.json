@@ -32,6 +32,26 @@
   },
   "results": [
     {
+      "id": "kimi-k2.5",
+      "model": "Kimi K2.5",
+      "model_version": "kimi-k2.5",
+      "provider": "Kimi",
+      "api_endpoint": "Kimi Coding Plan",
+      "test_date": "2026-03-21",
+      "notes": "Thinking enabled",
+      "scores": {
+        "Q1": 1,
+        "Q2": 1,
+        "Q3": 0,
+        "Q4": 1,
+        "Q5": 3,
+        "Q6": 3,
+        "Q7": 0,
+        "Q8": 0,
+        "Q9": 0
+      }
+    },
+    {
       "id": "claude-3-7-sonnet-20250219",
       "model": "Claude 3.7 Sonnet",
       "model_version": "claude-3-7-sonnet-20250219",
