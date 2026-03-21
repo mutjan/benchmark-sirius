@@ -4,6 +4,16 @@
 
 ---
 
+## 数据文件结构
+
+```
+data/
+  benchmark.json   # Benchmark 定义：题目、维度、等级（稳定，少改动）
+  results.json     # 模型测评结果数组（频繁追加）
+```
+
+---
+
 ## 快速启动
 
 ```bash
@@ -16,7 +26,7 @@ python3 -m http.server 8080
 
 ## 添加模型测评结果
 
-编辑 `data/scores.json`，在顶层 `results` 数组末尾追加一条记录：
+编辑 `data/results.json`，在数组末尾追加一条记录：
 
 ```json
 {
@@ -51,7 +61,7 @@ python3 -m http.server 8080
 
 ## 评分规则（questions）
 
-每道题的评分定义在 `data/scores.json` → `benchmark.questions` 数组中：
+每道题的评分定义在 `data/benchmark.json` → `questions` 数组中：
 
 ```json
 {
@@ -66,8 +76,8 @@ python3 -m http.server 8080
 
 **字段说明**
 - `id` — 题号，与 `results[].scores` 中的键对应，不可更改（除非同步修改所有结果）
-- `max` — 该题满分，修改后会影响维度满分和总分，需同步更新 `benchmark.total_points`
-- `dimension` — 所属维度的 `key`，需与 `benchmark.dimensions` 中的 key 对应
+- `max` — 该题满分，修改后会影响维度满分和总分，需同步更新 `total_points`
+- `dimension` — 所属维度的 `key`，需与 `dimensions` 中的 key 对应
 - `scoring` — 评分标准描述，悬浮提示中显示
 
 **当前题目一览**
@@ -90,7 +100,7 @@ python3 -m http.server 8080
 
 ## 维度定义（dimensions）
 
-维度在 `benchmark.dimensions` 数组中定义，用于雷达图和分类统计：
+维度在 `data/benchmark.json` → `dimensions` 数组中定义，用于雷达图和分类统计：
 
 ```json
 {
@@ -121,10 +131,10 @@ python3 -m http.server 8080
 
 ## 等级划分（tiers）
 
-等级定义在 `benchmark.tiers` 数组中，按总分区间显示徽章颜色：
+等级定义在 `data/benchmark.json` → `tiers` 数组中，按总分区间显示徽章：
 
 ```json
-{ "label": "S+", "min": 18, "color": "#ffd700" }
+{ "min": 16, "max": 20, "label": "完全解读", "description": "..." }
 ```
 
-修改 `min` 阈值或添加新等级均可，页面会自动应用。
+修改 `min`/`max` 阈值或添加新等级均可，页面会自动应用。

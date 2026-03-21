@@ -1038,9 +1038,11 @@
   </div>
 
   <div class="footer">
-    星图数据：<a href="data/scores.json" target="_blank">data/scores.json</a>
+    星图数据：<a href="data/benchmark.json" target="_blank">benchmark.json</a>
     &nbsp;·&nbsp;
-    新增模型：编辑 JSON 文件中 <code>results</code> 数组，刷新即可
+    <a href="data/results.json" target="_blank">results.json</a>
+    &nbsp;·&nbsp;
+    新增模型：编辑 <code>results.json</code>，刷新即可
   </div>
 </div>
 
@@ -1536,19 +1538,23 @@ function escHtml(s) {
 
 /* ── Bootstrap ─────────────────────────────────────── */
 async function main() {
-  let data;
+  let bm, results;
   try {
-    const resp = await fetch('data/scores.json');
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    data = await resp.json();
+    const [bmResp, resResp] = await Promise.all([
+      fetch('data/benchmark.json'),
+      fetch('data/results.json'),
+    ]);
+    if (!bmResp.ok) throw new Error(`benchmark.json HTTP ${bmResp.status}`);
+    if (!resResp.ok) throw new Error(`results.json HTTP ${resResp.status}`);
+    bm = await bmResp.json();
+    results = await resResp.json();
   } catch (e) {
     document.getElementById('lb-container').innerHTML =
-      `<div class="empty-state"><div class="icon">✦</div>无法加载 data/scores.json<br><small style="font-family:monospace;color:var(--text-3)">${e.message}</small><br><br><small>请通过 HTTP 服务器访问，例如：<br><code>python3 -m http.server 8080</code></small></div>`;
+      `<div class="empty-state"><div class="icon">✦</div>无法加载数据文件<br><small style="font-family:monospace;color:var(--text-3)">${e.message}</small><br><br><small>请通过 HTTP 服务器访问，例如：<br><code>python3 -m http.server 8080</code></small></div>`;
     return;
   }
 
-  const bm = data.benchmark;
-  const results = data.results.map(r => ({
+  results = results.map(r => ({
     ...r,
     _total: computeTotals(r, bm.questions),
   })).sort((a, b) => b._total - a._total);
