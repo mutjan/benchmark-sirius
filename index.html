@@ -609,7 +609,7 @@
     <div class="hero-meta">
       <div class="sirius-icon"></div>
       <div class="hero-meta-item" id="meta-updated">—</div>
-      <div class="hero-meta-item">满分 20 分 · 9 题</div>
+      <div class="hero-meta-item">满分 19 分 · 8 题</div>
     </div>
   </div>
 
@@ -617,17 +617,17 @@
   <div class="stats-row">
     <div class="stat-card">
       <div class="stat-label">最高分</div>
-      <div class="stat-value" id="stat-high">—<span class="stat-unit">/20</span></div>
+      <div class="stat-value" id="stat-high">—<span class="stat-unit">/19</span></div>
       <div class="stat-sub" id="stat-high-model">—</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">平均分</div>
-      <div class="stat-value" id="stat-avg">—<span class="stat-unit">/20</span></div>
+      <div class="stat-value" id="stat-avg">—<span class="stat-unit">/19</span></div>
       <div class="stat-sub" id="stat-n">共 0 个模型</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">最低分</div>
-      <div class="stat-value" id="stat-low">—<span class="stat-unit">/20</span></div>
+      <div class="stat-value" id="stat-low">—<span class="stat-unit">/19</span></div>
       <div class="stat-sub" id="stat-low-model">—</div>
     </div>
     <div class="stat-card">
@@ -744,8 +744,13 @@
       // Glow for bigger stars
       if (s.r > 1.2) {
         const grd = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r * 4);
-        grd.addColorStop(0, s.color.replace(')', ',0.6)').replace('#', 'rgba('));
-        // fallback: just alpha
+        // Parse hex color to rgba for glow
+        const hex = s.color.replace('#', '');
+        const rr = parseInt(hex.slice(0,2), 16);
+        const gg = parseInt(hex.slice(2,4), 16);
+        const bb = parseInt(hex.slice(4,6), 16);
+        grd.addColorStop(0, `rgba(${rr},${gg},${bb},0.6)`);
+        grd.addColorStop(1, `rgba(${rr},${gg},${bb},0)`);
         ctx.fillStyle = grd;
         ctx.beginPath();
         ctx.arc(s.x, s.y, s.r * 3.5, 0, Math.PI * 2);
@@ -1090,11 +1095,11 @@ function renderStats(bm, results) {
   ).length;
   const morseRate = Math.round(morseOk / results.length * 100);
 
-  document.getElementById('stat-high').innerHTML       = `${high}<span class="stat-unit">/20</span>`;
+  document.getElementById('stat-high').innerHTML       = `${high}<span class="stat-unit">/19</span>`;
   document.getElementById('stat-high-model').textContent = results.find(r => r._total === high)?.model || '';
-  document.getElementById('stat-avg').innerHTML        = `${avg}<span class="stat-unit">/20</span>`;
+  document.getElementById('stat-avg').innerHTML        = `${avg}<span class="stat-unit">/19</span>`;
   document.getElementById('stat-n').textContent        = `共 ${results.length} 个模型`;
-  document.getElementById('stat-low').innerHTML        = `${low}<span class="stat-unit">/20</span>`;
+  document.getElementById('stat-low').innerHTML        = `${low}<span class="stat-unit">/19</span>`;
   document.getElementById('stat-low-model').textContent = results.find(r => r._total === low)?.model || '';
   document.getElementById('stat-morse-rate').innerHTML = `${morseRate}<span class="stat-unit">%</span>`;
 
