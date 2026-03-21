@@ -1,0 +1,55 @@
+{
+  "benchmark": {
+    "title": "《シリウスの心臓》深层理解 Benchmark",
+    "subtitle": "多语言 × 天文学 × 密码学 × 时间推理 综合理解测评",
+    "version": "1.0",
+    "total_points": 20,
+    "questions": [
+      { "id": "Q1", "title": "符号识别", "max": 1, "dimension": "cipher", "description": "识别摩斯电码" },
+      { "id": "Q2", "title": "解码结果", "max": 1, "dimension": "cipher", "description": "解码得到 I LOVE YOU" },
+      { "id": "Q3", "title": "元语言密钥", "max": 2, "dimension": "meta", "description": "发现 ずっと 双关" },
+      { "id": "Q4", "title": "词语递进", "max": 2, "dimension": "language", "description": "寂しい→哀しい 的古语语源分析" },
+      { "id": "Q5", "title": "副歌演变", "max": 3, "dimension": "language", "description": "三段心臓状态的逻辑排列" },
+      { "id": "Q6", "title": "意象关联", "max": 3, "dimension": "astronomy", "description": "天狼星天文特性与主题对应" },
+      { "id": "Q7", "title": "引力词义", "max": 3, "dimension": "astronomy", "description": "双星引力结构的天文学解读" },
+      { "id": "Q8", "title": "天文背景", "max": 3, "dimension": "astronomy", "description": "双星系统与轨道周期背景" },
+      { "id": "Q9", "title": "发布时间意义", "max": 5, "dimension": "temporal", "description": "2020年发布时的轨道状态与象征意义" }
+    ],
+    "dimensions": [
+      { "key": "cipher",     "label": "符号识别",   "questions": ["Q1","Q2"], "max": 2  },
+      { "key": "meta",       "label": "元语言密钥", "questions": ["Q3"],      "max": 2  },
+      { "key": "language",   "label": "语言深度",   "questions": ["Q4","Q5"], "max": 5  },
+      { "key": "astronomy",  "label": "天文知识",   "questions": ["Q6","Q7","Q8"], "max": 9 },
+      { "key": "temporal",   "label": "时间推理",   "questions": ["Q9"],      "max": 5  }
+    ],
+    "tiers": [
+      { "min": 0,  "max": 4,  "label": "表面理解",   "description": "仅能看出这是一首思念之歌" },
+      { "min": 5,  "max": 8,  "label": "符号识别",   "description": "发现摩斯电码，解码 I LOVE YOU" },
+      { "min": 9,  "max": 12, "label": "语言深度",   "description": "理解ずっと / 寂しい→哀しい / なった的语言层" },
+      { "min": 13, "max": 16, "label": "天文联结",   "description": "理解双星系统、白矮星冷却与引力层" },
+      { "min": 17, "max": 20, "label": "完全解读",   "description": "包括发布时间的轨道计算和转折点象征" }
+    ]
+  },
+  "results": [
+    {
+      "id": "claude-3-7-sonnet-20250219",
+      "model": "Claude 3.7 Sonnet",
+      "model_version": "claude-3-7-sonnet-20250219",
+      "provider": "Anthropic",
+      "api_endpoint": "api.anthropic.com",
+      "test_date": "2026-03-20",
+      "notes": "Extended thinking enabled",
+      "scores": {
+        "Q1": 1,
+        "Q2": 1,
+        "Q3": 2,
+        "Q4": 2,
+        "Q5": 1.5,
+        "Q6": 3,
+        "Q7": 3,
+        "Q8": 2,
+        "Q9": 2
+      }
+    }
+  ]
+}

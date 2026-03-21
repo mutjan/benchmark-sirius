@@ -1,0 +1,6 @@
+[2026-03-21T12:29:43.645Z] GET http://localhost:18766/ → 200 (3ms, 30723B)
+[2026-03-21T12:29:43.655Z] GET http://localhost:18766/data/scores.json → 200 (23ms, 3102B)
+[2026-03-21T12:45:15.251Z] GET http://localhost:18767/ → 200 (5ms, 40940B)
+[2026-03-21T12:45:15.261Z] GET https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap → 200 (249ms, 15061B)
+[2026-03-21T12:45:15.566Z] GET https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7W0Q5nw.woff2 → 200 (339ms, 48432B)
+[2026-03-21T12:45:15.566Z] GET https://fonts.gstatic.com/s/cinzel/v26/8vIJ7ww63mVu7gt79mT7PkRXMw.woff2 → 200 (339ms, 25888B)
