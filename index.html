@@ -1194,7 +1194,16 @@ function computeDimensions(result, dimensions, questions) {
 /* ── Radar: cosmic style ───────────────────────────── */
 function drawRadar(canvas, bm, results, selectedId) {
   const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
+  const dpr = window.devicePixelRatio || 1;
+  /* Logical (CSS) size — used for all coordinate calculations */
+  const W = parseFloat(canvas.style.width) || canvas.offsetWidth || 320;
+  const H = W; // always square
+  /* Physical pixel size */
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, W, H);
 
   const cx = W / 2, cy = H / 2;
@@ -1549,13 +1558,6 @@ async function main() {
   renderLegend(results);
 
   const canvas = document.getElementById('radar-canvas');
-  const dpr = window.devicePixelRatio || 1;
-  const w = canvas.offsetWidth || 320;
-  canvas.width  = w * dpr;
-  canvas.height = w * dpr;
-  canvas.style.width  = w + 'px';
-  canvas.style.height = w + 'px';
-  canvas.getContext('2d').scale(dpr, dpr);
 
   drawRadar(canvas, bm, results, null);
 
