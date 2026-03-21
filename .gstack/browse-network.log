@@ -18,3 +18,4 @@
 [2026-03-21T14:14:49.631Z] GET https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7W0Q5nw.woff2 → 200 (9ms, 48432B)
 [2026-03-21T14:14:49.631Z] GET https://fonts.gstatic.com/s/cinzel/v26/8vIJ7ww63mVu7gt79mT7PkRXMw.woff2 → 200 (9ms, 25888B)
 [2026-03-21T14:14:49.631Z] GET http://localhost:8765/data/scores.json → 200 (18ms, 9360B)
+[2026-03-21T14:21:30.857Z] GET http://localhost:8791/benchmark-sirius/index.html → 404 (3ms, 335B)

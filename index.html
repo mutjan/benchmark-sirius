@@ -979,7 +979,7 @@
       <!-- Binary star orbit: Sirius A (blue-white) + Sirius B (white dwarf) — JS driven -->
       <canvas id="sirius-binary" class="sirius-icon" width="80" height="80" title="Sirius binary star system"></canvas>
       <div class="hero-meta-item" id="meta-updated">—</div>
-      <div class="hero-meta-item">满分 19 分 · 8 题</div>
+      <div class="hero-meta-item" id="meta-total-pts">—</div>
     </div>
   </div>
 
@@ -987,17 +987,17 @@
   <div class="stats-row">
     <div class="stat-card">
       <div class="stat-label">最高分</div>
-      <div class="stat-value" id="stat-high">—<span class="stat-unit">/19</span></div>
+      <div class="stat-value" id="stat-high">—</div>
       <div class="stat-sub" id="stat-high-model">—</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">平均分</div>
-      <div class="stat-value" id="stat-avg">—<span class="stat-unit">/19</span></div>
+      <div class="stat-value" id="stat-avg">—</div>
       <div class="stat-sub" id="stat-n">共 0 个模型</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">最低分</div>
-      <div class="stat-value" id="stat-low">—<span class="stat-unit">/19</span></div>
+      <div class="stat-value" id="stat-low">—</div>
       <div class="stat-sub" id="stat-low-model">—</div>
     </div>
     <div class="stat-card">
@@ -1505,17 +1505,19 @@ function renderStats(bm, results) {
     (r.scores.Q1 || 0) >= 1 && (r.scores.Q2 || 0) >= 1
   ).length;
   const morseRate = Math.round(morseOk / results.length * 100);
+  const tp = bm.total_points;
 
-  document.getElementById('stat-high').innerHTML       = `${high}<span class="stat-unit">/19</span>`;
+  document.getElementById('stat-high').innerHTML       = `${high}<span class="stat-unit">/${tp}</span>`;
   document.getElementById('stat-high-model').textContent = results.find(r => r._total === high)?.model || '';
-  document.getElementById('stat-avg').innerHTML        = `${avg}<span class="stat-unit">/19</span>`;
+  document.getElementById('stat-avg').innerHTML        = `${avg}<span class="stat-unit">/${tp}</span>`;
   document.getElementById('stat-n').textContent        = `共 ${results.length} 个模型`;
-  document.getElementById('stat-low').innerHTML        = `${low}<span class="stat-unit">/19</span>`;
+  document.getElementById('stat-low').innerHTML        = `${low}<span class="stat-unit">/${tp}</span>`;
   document.getElementById('stat-low-model').textContent = results.find(r => r._total === low)?.model || '';
   document.getElementById('stat-morse-rate').innerHTML = `${morseRate}<span class="stat-unit">%</span>`;
 
   const dates = results.map(r => r.test_date).sort();
   document.getElementById('meta-updated').textContent  = `最后更新：${dates[dates.length - 1] || '—'}`;
+  document.getElementById('meta-total-pts').textContent = `满分 ${tp} 分 · ${bm.questions.length} 题`;
 }
 
 /* ── Utilities ─────────────────────────────────────── */
