@@ -517,7 +517,188 @@
     }
     .dim-chip strong { color: var(--text); font-weight: 600; }
 
-    /* ── Q-card expandable answer ─────────────────── */
+    /* ── Benchmark prompt card ────────────────────── */
+    .bm-prompt-card {
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+    }
+    .bm-prompt-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: rgba(127,179,255,.06);
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+    }
+    .bm-prompt-header:hover { background: rgba(127,179,255,.1); }
+    .bm-prompt-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--sirius);
+    }
+    .bm-prompt-toggle {
+      font-size: 11px;
+      color: var(--text-3);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .bm-prompt-toggle-icon {
+      display: inline-block;
+      transition: transform .2s;
+      font-style: normal;
+    }
+    .bm-prompt-card.open .bm-prompt-toggle-icon { transform: rotate(90deg); }
+    .bm-prompt-body {
+      display: none;
+      padding: 14px 16px;
+    }
+    .bm-prompt-card.open .bm-prompt-body { display: block; }
+    .bm-prompt-text {
+      font-size: 13px;
+      line-height: 1.9;
+      color: var(--text-2);
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: var(--font);
+    }
+
+    /* ── Scoring point comparison table ──────────── */
+    .scoring-table-wrap {
+      overflow-x: auto;
+      margin-top: 0;
+    }
+    .scoring-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .scoring-table th,
+    .scoring-table td {
+      padding: 10px 14px;
+      text-align: left;
+      border: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .scoring-table thead th {
+      background: var(--surface-2);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .05em;
+      color: var(--text-3);
+      white-space: nowrap;
+    }
+    .scoring-table thead th.model-col {
+      color: var(--text);
+      font-size: 12px;
+      letter-spacing: 0;
+      text-align: center;
+      min-width: 180px;
+    }
+    .scoring-table tbody tr:hover td { background: rgba(127,179,255,.03); }
+    .scoring-table .q-row-label {
+      min-width: 140px;
+      white-space: nowrap;
+    }
+    .scoring-table .q-row-label .q-id-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--sirius);
+      font-family: "JetBrains Mono",ui-monospace,monospace;
+      margin-right: 4px;
+    }
+    .scoring-table .q-row-label .q-title-tag {
+      font-weight: 600;
+      color: var(--text);
+      font-size: 12px;
+    }
+    .scoring-table .q-scoring-desc {
+      font-size: 11px;
+      color: var(--text-3);
+      margin-top: 3px;
+      line-height: 1.5;
+    }
+    .scoring-table .q-max-pts {
+      font-size: 10px;
+      color: var(--text-3);
+      margin-top: 4px;
+    }
+    /* Cell with model's answer for a scoring point */
+    .model-answer-cell {
+      position: relative;
+    }
+    .model-answer-cell .score-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 99px;
+      margin-bottom: 7px;
+      white-space: nowrap;
+    }
+    .score-badge.full   { background: rgba(52,211,153,.18); color: #34d399; border: 1px solid rgba(52,211,153,.35); }
+    .score-badge.partial{ background: rgba(252,211,77,.15);  color: #fcd34d; border: 1px solid rgba(252,211,77,.3); }
+    .score-badge.zero   { background: rgba(100,116,139,.2);  color: #64748b; border: 1px solid rgba(100,116,139,.3); }
+    .model-answer-cell .snippet-text {
+      font-size: 12px;
+      line-height: 1.65;
+      color: var(--text-2);
+    }
+    .model-answer-cell .snippet-text.missed {
+      color: var(--text-3);
+      font-style: italic;
+    }
+    /* Model column header with full-answer button */
+    .model-col-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .model-col-name {
+      font-weight: 700;
+      font-size: 12px;
+      color: var(--text);
+    }
+    .model-col-meta {
+      font-size: 10px;
+      color: var(--text-3);
+    }
+    .model-col-score {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--nova);
+    }
+    .btn-full-answer {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 99px;
+      border: 1px solid var(--border-2);
+      background: rgba(127,179,255,.08);
+      color: var(--sirius);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, border-color .2s;
+      white-space: nowrap;
+    }
+    .btn-full-answer:hover {
+      background: rgba(127,179,255,.18);
+      border-color: var(--sirius);
+    }
+
+    /* ── Q-card expandable answer (kept for legacy) ─ */
     .q-card { cursor: pointer; }
     .q-card.expanded { border-color: var(--border-glow); }
     .q-expand-btn {
@@ -545,9 +726,7 @@
       border-top: 1px solid var(--border);
     }
     .q-card.expanded .q-detail-drawer { display: block; }
-    .q-prompt-block {
-      margin-bottom: 10px;
-    }
+    .q-prompt-block { margin-bottom: 10px; }
     .q-block-label {
       font-size: 10px;
       font-weight: 700;
@@ -1203,71 +1382,78 @@ function renderLeaderboard(bm, sortedResults) {
 }
 
 /* ── Detail panel ──────────────────────────────────── */
-function renderDetail(bm, res, allResults) {
+function renderDetail(bm, selectedRes, allResults) {
   const panel = document.getElementById('detail-panel');
-  const tier  = getTier(bm.tiers, res._total);
-  const ts    = tierStyle(tier.label);
-  const idx   = allResults.indexOf(res);
-  const color = PALETTE[idx % PALETTE.length];
-  const dimScores = computeDimensions(res, bm.dimensions, bm.questions);
 
-  const cards = bm.questions.map(q => {
-    const s = res.scores[q.id] ?? 0;
-    const pct = (s / q.max * 100).toFixed(0);
-    const dimLabel = bm.dimensions.find(d => d.key === q.dimension)?.label || q.dimension;
-    const colorFill = s >= q.max
-      ? `linear-gradient(90deg, ${color.stroke}aa, ${color.stroke})`
-      : s > 0
-        ? 'linear-gradient(90deg, rgba(192,132,252,.6), rgba(192,132,252,.9))'
-        : 'rgba(100,116,139,.3)';
-    const boxGlow = s >= q.max ? `0 0 8px ${color.stroke}60` : 'none';
-    const answer = res.answers?.[q.id];
-    const hasAnswer = answer && answer.text;
-    const hasPrompt = q.prompt;
-    const hasExpandable = hasAnswer || hasPrompt;
+  /* Build scoring-point comparison table across ALL results */
+  const modelCols = allResults.map((res, idx) => {
+    const tier  = getTier(bm.tiers, res._total);
+    const ts    = tierStyle(tier.label);
+    const color = PALETTE[idx % PALETTE.length];
+    return { res, tier, ts, color };
+  });
 
-    const drawerHtml = hasExpandable ? `
-      <div class="q-detail-drawer">
-        ${hasPrompt ? `
-        <div class="q-prompt-block">
-          <div class="q-block-label">测评提示词</div>
-          <div class="q-prompt-text">${escHtml(q.prompt)}</div>
-        </div>` : ''}
-        <div>
-          <div class="q-block-label">模型回答</div>
-          ${hasAnswer
-            ? `<div class="q-answer-text">${escHtml(answer.text)}</div>
-               ${answer.snippet ? `<div class="q-snippet">${escHtml(answer.snippet)}</div>` : ''}`
-            : `<div class="q-no-answer">（暂无原始回答记录）</div>`
-          }
-        </div>
-      </div>` : '';
-
-    const expandBtnHtml = hasExpandable
-      ? `<div class="q-expand-btn"><i class="q-expand-icon">▶</i> 查看提示词与回答</div>`
+  /* Column headers */
+  const modelColHeaders = modelCols.map(({ res, color }) => {
+    const safeId = escHtml(res.id);
+    const hasFullAnswer = res.full_answer && res.full_answer.trim();
+    const fullAnswerBtn = hasFullAnswer
+      ? `<button class="btn-full-answer" onclick="openFullAnswerModal('${safeId}')">▦ 完整答案</button>`
       : '';
-
     return `
-      <div class="q-card" onclick="this.classList.toggle('expanded')">
-        <div class="q-card-header">
-          <div>
-            <span class="q-id">${q.id}</span>
-            <div class="q-title">${escHtml(q.title)}</div>
-          </div>
-          <div class="q-score-display">
-            <span class="q-score-val" style="text-shadow:${boxGlow}">${s === Math.floor(s) ? s : s.toFixed(1)}</span>
-            <span class="q-score-max"> / ${q.max}</span>
-          </div>
+      <th class="model-col">
+        <div class="model-col-header">
+          <div class="model-col-name" style="color:${color.stroke}">${escHtml(res.model)}</div>
+          <div class="model-col-meta">${escHtml(res.provider)} · ${escHtml(res.notes||res.test_date)}</div>
+          <div class="model-col-score">${res._total} / ${bm.total_points} 分</div>
+          ${fullAnswerBtn}
         </div>
-        <div class="q-progress">
-          <div class="q-progress-fill" style="width:${pct}%;background:${colorFill}"></div>
-        </div>
-        <span class="q-dimension-tag">${escHtml(dimLabel)}</span>
-        ${expandBtnHtml}
-        ${drawerHtml}
-      </div>`;
+      </th>`;
   }).join('');
 
+  /* One row per scoring question */
+  const rows = bm.questions.map(q => {
+    const dimLabel = bm.dimensions.find(d => d.key === q.dimension)?.label || q.dimension;
+
+    const labelCell = `
+      <td class="q-row-label">
+        <span class="q-id-tag">${escHtml(q.id)}</span><span class="q-title-tag">${escHtml(q.title)}</span>
+        <div class="q-scoring-desc">${escHtml(q.scoring || q.description)}</div>
+        <div class="q-max-pts">${escHtml(dimLabel)} · ${q.max}分</div>
+      </td>`;
+
+    const answerCells = modelCols.map(({ res, color }) => {
+      const s   = res.scores[q.id] ?? 0;
+      const snippet = res.answers?.[q.id]?.snippet;
+      const badgeClass = s >= q.max ? 'full' : s > 0 ? 'partial' : 'zero';
+      const scoreLabel = `${s}/${q.max}`;
+      const snippetHtml = snippet
+        ? `<div class="snippet-text">${escHtml(snippet)}</div>`
+        : `<div class="snippet-text missed">（未覆盖该得分点）</div>`;
+      return `
+        <td class="model-answer-cell">
+          <span class="score-badge ${badgeClass}">${scoreLabel}</span>
+          ${snippetHtml}
+        </td>`;
+    }).join('');
+
+    return `<tr>${labelCell}${answerCells}</tr>`;
+  }).join('');
+
+  /* Benchmark prompt card */
+  const promptCard = bm.prompt ? `
+    <div class="bm-prompt-card" id="bm-prompt-card">
+      <div class="bm-prompt-header" onclick="document.getElementById('bm-prompt-card').classList.toggle('open')">
+        <span class="bm-prompt-label">✦ 完整测评提示词</span>
+        <span class="bm-prompt-toggle"><i class="bm-prompt-toggle-icon">▶</i> 展开查看</span>
+      </div>
+      <div class="bm-prompt-body">
+        <div class="bm-prompt-text">${escHtml(bm.prompt)}</div>
+      </div>
+    </div>` : '';
+
+  /* Dim summary across selected model */
+  const dimScores = computeDimensions(selectedRes, bm.dimensions, bm.questions);
   const dimSummary = dimScores.map(d =>
     `<span class="dim-chip">${d.label} <strong>${d.score}/${d.max}</strong></span>`
   ).join('<span style="color:var(--border-2);margin:0 4px">·</span>');
@@ -1275,20 +1461,26 @@ function renderDetail(bm, res, allResults) {
   panel.innerHTML = `
     <div class="detail-header">
       <div>
-        <div class="panel-title" style="margin-bottom:5px">◎ 得分详情</div>
-        <div class="detail-model-name">${escHtml(res.model)}</div>
-        <div class="detail-model-meta">${escHtml(res.provider)} · ${escHtml(res.test_date)}${res.notes ? ' · ' + escHtml(res.notes) : ''}</div>
-      </div>
-      <div class="tier-display">
-        <div>
-          <div class="tier-label" style="color:${ts.color};text-shadow:0 0 10px ${ts.color}80">${escHtml(tier.label)}</div>
-          <div class="tier-desc">${res._total} / ${bm.total_points} 分</div>
-        </div>
+        <div class="panel-title" style="margin-bottom:5px">◎ 得分详情 · 各模型得分点对比</div>
       </div>
     </div>
+    ${promptCard}
     <div class="dim-summary">${dimSummary}</div>
-    <div class="q-grid">${cards}</div>
+    <div class="scoring-table-wrap">
+      <table class="scoring-table">
+        <thead>
+          <tr>
+            <th>得分点</th>
+            ${modelColHeaders}
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
   `;
+
+  /* Store model data for modal access */
+  window._bmAllResults = allResults;
 }
 
 /* ── Radar legend ──────────────────────────────────── */
@@ -1409,6 +1601,22 @@ function openPromptModal(qId, questionTitle, promptText, modelName, answerText, 
     <div class="prompt-modal-answer-header" style="margin-bottom:8px">测评提示词</div>
     <div class="prompt-modal-prompt">${escHtml(promptText || '（无提示词）')}</div>
     ${answerHtml}
+  `;
+  backdrop.classList.add('open');
+}
+
+function openFullAnswerModal(modelId) {
+  const allResults = window._bmAllResults || [];
+  const res = allResults.find(r => r.id === modelId);
+  if (!res) return;
+  const backdrop = document.getElementById('prompt-modal-backdrop');
+  document.getElementById('pmodal-title').textContent = `${escHtml(res.model)} · 完整原始答案`;
+  document.getElementById('pmodal-meta').textContent = `${escHtml(res.provider)} · ${escHtml(res.test_date)}${res.notes ? ' · ' + escHtml(res.notes) : ''}`;
+  const body = document.getElementById('pmodal-body');
+  const fullAnswer = res.full_answer || '（无完整答案记录）';
+  body.innerHTML = `
+    <div class="prompt-modal-answer-header" style="margin-bottom:8px">模型完整回答</div>
+    <div class="prompt-modal-answer">${escHtml(fullAnswer)}</div>
   `;
   backdrop.classList.add('open');
 }
