@@ -177,28 +177,11 @@
       flex-shrink: 0;
     }
     .hero-meta-item { font-size: 12px; color: var(--text-3); letter-spacing: .02em; }
-    /* Sirius icon — glowing dot */
+    /* Sirius binary star orbit animation */
     .sirius-icon {
-      width: 48px;
-      height: 48px;
-      position: relative;
+      width: 80px;
+      height: 80px;
       flex-shrink: 0;
-    }
-    .sirius-icon::before {
-      content: '★';
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      color: var(--sirius);
-      text-shadow: 0 0 16px var(--sirius), 0 0 32px rgba(127,179,255,.5);
-      animation: star-twinkle 3s ease-in-out infinite alternate;
-    }
-    @keyframes star-twinkle {
-      from { opacity: .7; text-shadow: 0 0 12px var(--sirius), 0 0 24px rgba(127,179,255,.4); }
-      to   { opacity: 1;  text-shadow: 0 0 20px var(--sirius), 0 0 48px rgba(127,179,255,.7), 0 0 4px #fff; }
     }
 
     /* ── Stat cards ───────────────────────────────── */
@@ -814,7 +797,8 @@
       </div>
     </div>
     <div class="hero-meta">
-      <div class="sirius-icon"></div>
+      <!-- Binary star orbit: Sirius A (blue-white) + Sirius B (white dwarf) — JS driven -->
+      <canvas id="sirius-binary" class="sirius-icon" width="80" height="80" title="Sirius binary star system"></canvas>
       <div class="hero-meta-item" id="meta-updated">—</div>
       <div class="hero-meta-item">满分 19 分 · 8 题</div>
     </div>
@@ -1437,6 +1421,106 @@ function closePromptModal(e) {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closePromptModal(null);
 });
+
+/* ── Sirius Binary Star Orbit Animation ─────────────────────────────────────
+   Two-body Keplerian orbit: Sirius A (blue-white, m≈2M☉) + Sirius B (white
+   dwarf, m≈1M☉). Stars orbit their shared centre of mass at ratio 1:2.
+   Sirius A orbit radius ≈ 1/3 of separation; Sirius B ≈ 2/3 of separation.
+   Uses Canvas 2D for crisp, reliable animation across all browsers.
+──────────────────────────────────────────────────────────────────────────── */
+(function initBinaryStarAnimation() {
+  const canvas = document.getElementById('sirius-binary');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W / 2, cy = H / 2;
+
+  // Orbital parameters (pixels, elliptical with tilt)
+  const aA = 17, bA = 9;   // Sirius A semi-axes (larger orbit)
+  const aB = 10, bB = 5.5; // Sirius B semi-axes (smaller orbit, opposite phase)
+  const tilt = Math.PI / 12; // 15° orbital plane tilt for 3D feel
+  const PERIOD = 6000;       // ms per orbit
+
+  function ellipsePoint(a, b, angle, tiltAngle) {
+    const x0 = a * Math.cos(angle);
+    const y0 = b * Math.sin(angle);
+    // Apply tilt rotation
+    return {
+      x: cx + x0 * Math.cos(tiltAngle) - y0 * Math.sin(tiltAngle),
+      y: cy + x0 * Math.sin(tiltAngle) + y0 * Math.cos(tiltAngle)
+    };
+  }
+
+  function drawGlow(x, y, radius, r, g, b, glowRadius) {
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, glowRadius);
+    grad.addColorStop(0,   `rgba(${r},${g},${b},0.95)`);
+    grad.addColorStop(0.3, `rgba(${r},${g},${b},0.6)`);
+    grad.addColorStop(0.7, `rgba(${r},${g},${b},0.15)`);
+    grad.addColorStop(1,   `rgba(${r},${g},${b},0)`);
+    ctx.beginPath();
+    ctx.arc(x, y, glowRadius, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+    // Hard core
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${r},${g},${b},1)`;
+    ctx.fill();
+  }
+
+  function drawOrbitTrail(a, b, tiltAngle, color, alpha) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 0.6;
+    ctx.setLineDash([2, 3]);
+    ctx.beginPath();
+    for (let i = 0; i <= 64; i++) {
+      const angle = (i / 64) * Math.PI * 2;
+      const pt = ellipsePoint(a, b, angle, tiltAngle);
+      i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function animate(ts) {
+    ctx.clearRect(0, 0, W, H);
+
+    const t = (ts % PERIOD) / PERIOD; // 0..1
+    const angleA = t * Math.PI * 2;
+    const angleB = angleA + Math.PI; // opposite phase
+
+    // Draw orbit trails
+    drawOrbitTrail(aA, bA, tilt, '#7fb3ff', 0.2);
+    drawOrbitTrail(aB, bB, tilt, '#ffe8a0', 0.15);
+
+    // Centre of mass — subtle pulse
+    const pulse = 0.3 + 0.2 * Math.sin(ts / 800);
+    ctx.beginPath();
+    ctx.arc(cx, cy, 1.5, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,255,255,${pulse})`;
+    ctx.fill();
+
+    // Sirius B (white dwarf) — smaller, warm white, behind A
+    const ptB = ellipsePoint(aB, bB, angleB, tilt);
+    drawGlow(ptB.x, ptB.y, 2.2, 255, 245, 210, 9);
+
+    // Sirius A (blue-white giant) — larger, vivid blue-white, rendered on top
+    const ptA = ellipsePoint(aA, bA, angleA, tilt);
+    drawGlow(ptA.x, ptA.y, 4, 168, 204, 255, 16);
+    // Bright white inner core
+    ctx.beginPath();
+    ctx.arc(ptA.x, ptA.y, 2, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(220,235,255,0.95)';
+    ctx.fill();
+
+    requestAnimationFrame(animate);
+  }
+
+  requestAnimationFrame(animate);
+})();
 </script>
 </body>
 </html>
