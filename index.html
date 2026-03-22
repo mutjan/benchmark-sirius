@@ -178,6 +178,29 @@
       flex-shrink: 0;
     }
     .hero-meta-item { font-size: 12px; color: var(--text-3); letter-spacing: .02em; }
+    .hero-video-wrap {
+      position: relative;
+      width: 280px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(100,149,237,.25);
+      box-shadow: 0 0 16px rgba(100,149,237,.15), 0 4px 20px rgba(0,0,0,.4);
+      background: #0a0c14;
+    }
+    .hero-video {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16/9;
+      border: none;
+    }
+    .hero-video-caption {
+      padding: 6px 10px;
+      font-size: 11px;
+      color: var(--text-3);
+      letter-spacing: .04em;
+      text-align: center;
+      border-top: 1px solid rgba(100,149,237,.12);
+    }
     /* Sirius binary star orbit animation */
     .sirius-icon {
       width: 80px;
@@ -243,6 +266,9 @@
     @media (max-width: 900px) {
       .main-grid { grid-template-columns: 1fr; }
       .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .hero { flex-direction: column; }
+      .hero-meta { align-items: flex-start; width: 100%; }
+      .hero-video-wrap { width: 100%; max-width: 400px; }
     }
 
     /* ── Panel ────────────────────────────────────── */
@@ -962,6 +988,13 @@
       </div>
     </div>
     <div class="hero-meta">
+      <!-- Original song video embed -->
+      <div class="hero-video-wrap">
+        <iframe class="hero-video"
+          src="//player.bilibili.com/player.html?bvid=BV15v411t79V&page=1&high_quality=1&danmaku=0&autoplay=0"
+          scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
+        <div class="hero-video-caption">▶ 原作 MV · シリウスの心臓</div>
+      </div>
       <!-- Binary star orbit: Sirius A (blue-white) + Sirius B (white dwarf) — JS driven -->
       <canvas id="sirius-binary" class="sirius-icon" width="80" height="80" title="Sirius binary star system"></canvas>
       <div class="hero-meta-item" id="meta-updated">—</div>
