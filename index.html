@@ -1717,15 +1717,15 @@ function escHtml(s) {
 }
 
 /* Convert a raw model id into a human-readable display name.
-   If model and model_version are identical the id is all-lowercase-kebab,
-   so we title-case it and strip trailing pure-digit version suffixes (e.g. -260215). */
+   Triggers when model and model_version are the same string (case-insensitive),
+   i.e. only a raw kebab-case id is stored and there is no human-readable name yet. */
 function modelDisplayName(res) {
   const raw = res.model || '';
   const ver = res.model_version || '';
-  // Only reformat when name and version are the same (raw id stored in both)
-  if (raw !== ver) return raw;
+  // Only reformat when name and version carry the same id (case-insensitive)
+  if (raw.toLowerCase() !== ver.toLowerCase()) return raw;
   return raw
-    .replace(/-(\d{5,})$/g, '')                  // strip trailing date suffix e.g. -260215
+    .replace(/-(\d{4,})$/g, '')                  // strip trailing date suffix e.g. -2601, -260215
     .replace(/-(\d+)-(\d+)(?=-|$)/g, ' $1.$2')  // merge version fragments: -2-0 → 2.0
     .split('-')
     .map(w => w.charAt(0).toUpperCase() + w.slice(1))
