@@ -500,23 +500,6 @@
       letter-spacing: .03em;
     }
 
-    /* ── Dim summary row ──────────────────────────── */
-    .dim-summary {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 16px;
-      padding: 12px 16px;
-      background: rgba(127,179,255,.05);
-      border-radius: var(--r);
-      border: 1px solid var(--border);
-    }
-    .dim-chip {
-      font-size: 12px;
-      color: var(--text-2);
-    }
-    .dim-chip strong { color: var(--text); font-weight: 600; }
-
     /* ── Benchmark prompt card ────────────────────── */
     .bm-prompt-card {
       margin-bottom: 20px;
@@ -1463,12 +1446,6 @@ function renderDetail(bm, selectedRes, allResults) {
       </div>
     </div>` : '';
 
-  /* Dim summary across selected model */
-  const dimScores = computeDimensions(selectedRes, bm.dimensions, bm.questions);
-  const dimSummary = dimScores.map(d =>
-    `<span class="dim-chip">${d.label} <strong>${d.score}/${d.max}</strong></span>`
-  ).join('<span style="color:var(--border-2);margin:0 4px">·</span>');
-
   panel.innerHTML = `
     <div class="detail-header">
       <div>
@@ -1476,7 +1453,6 @@ function renderDetail(bm, selectedRes, allResults) {
       </div>
     </div>
     ${promptCard}
-    <div class="dim-summary">${dimSummary}</div>
     <div class="scoring-table-wrap">
       <table class="scoring-table">
         <thead>
