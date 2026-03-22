@@ -1489,7 +1489,7 @@ function renderStats(bm, results) {
   const low    = Math.min(...totals);
   const avg    = (totals.reduce((a, b) => a + b, 0) / totals.length).toFixed(1);
   const morseOk = results.filter(r =>
-    (r.scores.Q1 || 0) >= 1 && (r.scores.Q2 || 0) >= 1
+    (r.scores.Q1 || 0) >= 1 && (r.scores.Q2 || 0) >= 2
   ).length;
   const morseRate = Math.round(morseOk / results.length * 100);
   const tp = bm.total_points;
