@@ -138,3 +138,70 @@ python3 -m http.server 8080
 ```
 
 修改 `min`/`max` 阈值或添加新等级均可，页面会自动应用。
+
+---
+
+## JSON 特殊字符转义规范
+
+`data/benchmark.json` 和 `data/results.json` 均为标准 JSON，**所有字符串值必须合法转义**，否则页面会静默白屏或数据丢失。
+
+### 常见踩坑
+
+| 场景 | 错误写法 | 正确写法 |
+|------|----------|----------|
+| 字符串内含双引号 | `"answer": "他说"好""` | `"answer": "他说\"好\""` |
+| 字符串内含换行 | `"prompt": "第一行\n第二行"` （实际裸换行） | `"prompt": "第一行\\n第二行"` |
+| 反斜杠本身 | `"path": "C:\users"` | `"path": "C:\\users"` |
+
+> **注意**：`prompt` 字段的摩斯电码片段（`·`、`-`）本身无需转义；但如果字段内含有实际的回车符（ASCII 0x0A），JSON 解析会直接报错，必须替换为 `\n`。
+
+### 验证方法
+
+```bash
+# 验证 JSON 合法性（python3 内置，无需安装）
+python3 -m json.tool data/benchmark.json > /dev/null && echo "OK"
+python3 -m json.tool data/results.json  > /dev/null && echo "OK"
+```
+
+如果输出 `OK` 说明文件合法；否则会打印出错行号，定位修复后再刷新页面。
+
+---
+
+## 雷达图（星图）操作说明
+
+雷达图展示所有模型在五个维度上的得分。
+
+**默认状态**：全量显示所有模型，各自用独立颜色实线绘制，顶点有发光圆点。
+
+**交互**：
+- 点击排行榜中的某模型 → 该模型高亮，其余模型降至 45% 透明度并改为虚线轮廓
+- 再次点击同一模型（或点击空白处）→ 恢复全量显示
+
+**更新雷达图轴（维度变更）**：
+1. 修改 `data/benchmark.json` → `dimensions` 数组（增删维度或改 `label`）
+2. 同步修改 `questions[].dimension` 字段，确保每道题映射到存在的维度 key
+3. 同步更新每个维度的 `max`（= 所含题目 max 之和）和顶层 `total_points`
+4. 运行 JSON 合法性验证，刷新页面即生效
+
+**注意**：雷达图轴数量由 `dimensions` 数组长度自动决定，增减维度后坐标系会自动重算，无需修改 `index.html`。
+
+---
+
+## B 站 MV 嵌入
+
+Hero 区右侧通过 `<iframe>` 内嵌 B 站播放器，相关参数说明：
+
+```html
+<iframe src="//player.bilibili.com/player.html
+  ?bvid=BV15v411t79V   <!-- 视频 BV 号 -->
+  &danmaku=0           <!-- 关闭弹幕 -->
+  &autoplay=0          <!-- 禁止自动播放 -->
+  &high_quality=1"     <!-- 默认高清 -->
+```
+
+**替换视频**：将 `bvid=` 后的值改为目标 BV 号即可，其余参数保持不变。
+
+**样式注意事项**：
+- `.hero-video-wrap` 固定宽度 `280px`，窄屏（< 900px）自动变 `width: 100%; max-width: 400px`
+- `aspect-ratio: 16/9` 维持比例，无需手动设置高度
+- 若 B 站因跨域限制导致播放器加载失败，在本地 `http.server` 模式下属正常现象，部署到 HTTPS 域名后即可正常播放
