@@ -1737,8 +1737,8 @@ async function main() {
   let bm, results;
   try {
     const [bmResp, resResp] = await Promise.all([
-      fetch('data/benchmark.json'),
-      fetch('data/results.json'),
+      fetch('data/benchmark.json', {cache: 'no-store'}),
+      fetch('data/results.json', {cache: 'no-store'}),
     ]);
     if (!bmResp.ok) throw new Error(`benchmark.json HTTP ${bmResp.status}`);
     if (!resResp.ok) throw new Error(`results.json HTTP ${resResp.status}`);
