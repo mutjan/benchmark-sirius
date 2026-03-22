@@ -1452,7 +1452,7 @@ function renderLeaderboard(bm, sortedResults) {
         <td><span class="${rankClass}">${rank}</span></td>
         <td>
           <div class="model-cell">
-            <div class="name">${escHtml(res.model)}</div>
+            <div class="name">${escHtml(modelDisplayName(res))}</div>
             <div class="version">${escHtml(res.model_version || '')}</div>
           </div>
         </td>
@@ -1714,6 +1714,22 @@ function renderStats(bm, results) {
 /* ── Utilities ─────────────────────────────────────── */
 function escHtml(s) {
   return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* Convert a raw model id into a human-readable display name.
+   If model and model_version are identical the id is all-lowercase-kebab,
+   so we title-case it and strip trailing pure-digit version suffixes (e.g. -260215). */
+function modelDisplayName(res) {
+  const raw = res.model || '';
+  const ver = res.model_version || '';
+  // Only reformat when name and version are the same (raw id stored in both)
+  if (raw !== ver) return raw;
+  return raw
+    .replace(/-(\d{5,})$/g, '')                  // strip trailing date suffix e.g. -260215
+    .replace(/-(\d+)-(\d+)(?=-|$)/g, ' $1.$2')  // merge version fragments: -2-0 → 2.0
+    .split('-')
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
 }
 
 /* ── Bootstrap ─────────────────────────────────────── */
