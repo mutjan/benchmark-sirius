@@ -431,6 +431,77 @@
       box-shadow: 0 4px 16px rgba(0,0,0,.5);
     }
 
+    /* ── Model filter checkboxes ─────────────────── */
+    .lb-filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding: 0 2px;
+    }
+    .lb-filter-label {
+      font-size: 10.5px;
+      color: var(--text-3);
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .lb-filter-btn {
+      font-size: 10.5px;
+      padding: 2px 9px;
+      border-radius: var(--r-sm);
+      background: rgba(127,179,255,.07);
+      border: 1px solid rgba(127,179,255,.18);
+      color: var(--text-2);
+      cursor: pointer;
+      transition: border-color .14s, color .14s;
+      white-space: nowrap;
+    }
+    .lb-filter-btn:hover { border-color: var(--sirius); color: var(--sirius); }
+    .lb-sel-count {
+      font-size: 10.5px;
+      color: var(--text-3);
+      margin-left: auto;
+      font-family: "JetBrains Mono",ui-monospace,monospace;
+      white-space: nowrap;
+    }
+    /* checkbox column */
+    .lb-table th.cb-col, .lb-table td.cb-col {
+      width: 28px;
+      padding: 0 6px 0 2px;
+    }
+    .lb-checkbox {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border: 1.5px solid rgba(127,179,255,.35);
+      border-radius: 3px;
+      background: transparent;
+      cursor: pointer;
+      display: block;
+      position: relative;
+      transition: border-color .14s, background .14s;
+    }
+    .lb-checkbox:checked {
+      background: var(--sirius);
+      border-color: var(--sirius);
+    }
+    .lb-checkbox:checked::after {
+      content: '';
+      position: absolute;
+      left: 3px; top: 1px;
+      width: 5px; height: 8px;
+      border: 1.5px solid #fff;
+      border-top: none; border-left: none;
+      transform: rotate(40deg);
+    }
+    .lb-checkbox:hover { border-color: var(--sirius); }
+    /* dim rows that are unchecked */
+    .lb-table tr[data-id].lb-unselected { opacity: .38; }
+    .lb-table tr[data-id].lb-unselected:hover { opacity: .7; }
+
     /* ── Radar ────────────────────────────────────── */
     .radar-wrap { display: flex; flex-direction: column; align-items: center; }
     #radar-canvas { width: 100%; max-width: 320px; aspect-ratio: 1 / 1; }
@@ -1371,9 +1442,13 @@ function renderLeaderboard(bm, sortedResults) {
     }).join('');
 
     const rankClass = rank === 1 ? 'rank rank-1' : rank === 2 ? 'rank rank-2' : rank === 3 ? 'rank rank-3' : 'rank';
+    const checked   = window._selectedIds && window._selectedIds.has(res.id) ? 'checked' : '';
 
     return `
-      <tr data-id="${res.id}">
+      <tr data-id="${res.id}"${checked ? '' : ' class="lb-unselected"'}>
+        <td class="cb-col" onclick="event.stopPropagation()">
+          <input type="checkbox" class="lb-checkbox" data-id="${res.id}" ${checked}>
+        </td>
         <td><span class="${rankClass}">${rank}</span></td>
         <td>
           <div class="model-cell">
@@ -1397,10 +1472,20 @@ function renderLeaderboard(bm, sortedResults) {
       </tr>`;
   }).join('');
 
+  const selCount = window._selectedIds ? window._selectedIds.size : sortedResults.length;
+  const allChecked = window._selectedIds ? window._selectedIds.size === sortedResults.length : true;
+
   container.innerHTML = `
+    <div class="lb-filter-bar">
+      <span class="lb-filter-label">显示模型</span>
+      <button class="lb-filter-btn" id="lb-sel-all">全选</button>
+      <button class="lb-filter-btn" id="lb-sel-none">全不选</button>
+      <span class="lb-sel-count" id="lb-sel-count">${selCount} / ${sortedResults.length} 已选</span>
+    </div>
     <table class="lb-table">
       <thead>
         <tr>
+          <th class="cb-col"><input type="checkbox" class="lb-checkbox" id="lb-cb-all" ${allChecked ? 'checked' : ''}></th>
           <th>#</th>
           <th>模型</th>
           <th>供应商</th>
@@ -1412,15 +1497,84 @@ function renderLeaderboard(bm, sortedResults) {
       <tbody>${rows}</tbody>
     </table>`;
 
+  /* ── checkbox interaction ── */
+  function syncCountDisplay() {
+    const cnt = window._selectedIds ? window._selectedIds.size : 0;
+    const el = container.querySelector('#lb-sel-count');
+    if (el) el.textContent = `${cnt} / ${sortedResults.length} 已选`;
+    const cbAll = container.querySelector('#lb-cb-all');
+    if (cbAll) cbAll.checked = cnt === sortedResults.length;
+  }
+
+  function toggleId(id, checked) {
+    if (!window._selectedIds) return;
+    if (checked) window._selectedIds.add(id);
+    else window._selectedIds.delete(id);
+    // update row dim class
+    const tr = container.querySelector(`tr[data-id="${id}"]`);
+    if (tr) tr.classList.toggle('lb-unselected', !checked);
+    syncCountDisplay();
+    if (window._onSelectionChange) window._onSelectionChange();
+  }
+
+  // Per-row checkboxes
+  container.querySelectorAll('.lb-checkbox[data-id]').forEach(cb => {
+    cb.addEventListener('change', () => toggleId(cb.dataset.id, cb.checked));
+  });
+
+  // Header "select all" checkbox
+  const cbAll = container.querySelector('#lb-cb-all');
+  if (cbAll) {
+    cbAll.addEventListener('change', () => {
+      sortedResults.forEach(r => {
+        if (cbAll.checked) window._selectedIds.add(r.id);
+        else window._selectedIds.delete(r.id);
+        const cb = container.querySelector(`.lb-checkbox[data-id="${r.id}"]`);
+        if (cb) cb.checked = cbAll.checked;
+        const tr = container.querySelector(`tr[data-id="${r.id}"]`);
+        if (tr) tr.classList.toggle('lb-unselected', !cbAll.checked);
+      });
+      syncCountDisplay();
+      if (window._onSelectionChange) window._onSelectionChange();
+    });
+  }
+
+  // Buttons
+  container.querySelector('#lb-sel-all').addEventListener('click', () => {
+    sortedResults.forEach(r => {
+      window._selectedIds.add(r.id);
+      const cb = container.querySelector(`.lb-checkbox[data-id="${r.id}"]`);
+      if (cb) cb.checked = true;
+      const tr = container.querySelector(`tr[data-id="${r.id}"]`);
+      if (tr) tr.classList.remove('lb-unselected');
+    });
+    syncCountDisplay();
+    if (window._onSelectionChange) window._onSelectionChange();
+  });
+  container.querySelector('#lb-sel-none').addEventListener('click', () => {
+    sortedResults.forEach(r => {
+      window._selectedIds.delete(r.id);
+      const cb = container.querySelector(`.lb-checkbox[data-id="${r.id}"]`);
+      if (cb) cb.checked = false;
+      const tr = container.querySelector(`tr[data-id="${r.id}"]`);
+      if (tr) tr.classList.add('lb-unselected');
+    });
+    syncCountDisplay();
+    if (window._onSelectionChange) window._onSelectionChange();
+  });
+
+  /* ── row click (for active highlight; skip if clicking checkbox) ── */
   container.querySelectorAll('tr[data-id]').forEach(tr => {
-    tr.addEventListener('click', () => {
+    tr.addEventListener('click', (e) => {
+      if (e.target.classList.contains('lb-checkbox')) return;
       const id = tr.dataset.id;
       const res = sortedResults.find(r => r.id === id);
-      renderDetail(bm, res, sortedResults);
+      const filtered = sortedResults.filter(r => window._selectedIds && window._selectedIds.has(r.id));
+      renderDetail(bm, res, filtered.length ? filtered : sortedResults);
       container.querySelectorAll('tr[data-id]').forEach(r => r.classList.remove('active'));
       tr.classList.add('active');
       const canvas = document.getElementById('radar-canvas');
-      drawRadar(canvas, bm, sortedResults, id);
+      drawRadar(canvas, bm, filtered.length ? filtered : sortedResults, id);
     });
   });
 }
@@ -1584,6 +1738,21 @@ async function main() {
     ...r,
     _total: computeTotals(r, bm.questions),
   })).sort((a, b) => b._total - a._total);
+
+  // Initialize selection state: all models selected by default
+  window._selectedIds = new Set(results.map(r => r.id));
+
+  // Called whenever selection changes — re-renders radar + detail
+  window._onSelectionChange = function() {
+    const filtered = results.filter(r => window._selectedIds.has(r.id));
+    const canvas = document.getElementById('radar-canvas');
+    // Preserve currently active row highlight
+    const activeRow = document.querySelector('tr[data-id].active');
+    const activeId  = activeRow ? activeRow.dataset.id : null;
+    const radarId   = (activeId && window._selectedIds.has(activeId)) ? activeId : null;
+    drawRadar(canvas, bm, filtered.length ? filtered : results, radarId);
+    renderDetail(bm, filtered.length ? filtered[0] : results[0], filtered.length ? filtered : results);
+  };
 
   renderStats(bm, results);
   renderLeaderboard(bm, results);
