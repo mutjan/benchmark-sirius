@@ -1755,8 +1755,8 @@ async function main() {
     _total: computeTotals(r, bm.questions),
   })).sort((a, b) => b._total - a._total);
 
-  // Initialize selection state: all models selected by default
-  window._selectedIds = new Set(results.map(r => r.id));
+  // Initialize selection state: top 5 models selected by default
+  window._selectedIds = new Set(results.slice(0, 5).map(r => r.id));
 
   // Called whenever selection changes — re-renders radar + detail
   window._onSelectionChange = function() {
