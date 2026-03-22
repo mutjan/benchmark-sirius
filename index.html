@@ -1253,13 +1253,20 @@
    BENCHMARK APP
 ═════════════════════════════════════════════════════ */
 
-/* Color palette for models — cosmic tones */
+/* Color palette for models — 12 distinct cosmic tones, no repeats up to 12 models */
 const PALETTE = [
-  { stroke: '#7fb3ff', fill: 'rgba(127,179,255,.14)' },
-  { stroke: '#34d399', fill: 'rgba(52,211,153,.13)'  },
-  { stroke: '#c084fc', fill: 'rgba(192,132,252,.13)' },
-  { stroke: '#fcd34d', fill: 'rgba(252,211,77,.13)'  },
-  { stroke: '#f87171', fill: 'rgba(248,113,113,.13)' },
+  { stroke: '#7fb3ff', fill: 'rgba(127,179,255,.14)' },  // 1 sirius blue
+  { stroke: '#34d399', fill: 'rgba(52,211,153,.13)'  },  // 2 pulsar green
+  { stroke: '#c084fc', fill: 'rgba(192,132,252,.13)' },  // 3 nebula violet
+  { stroke: '#fcd34d', fill: 'rgba(252,211,77,.13)'  },  // 4 nova gold
+  { stroke: '#f87171', fill: 'rgba(248,113,113,.13)' },  // 5 dwarf red
+  { stroke: '#38bdf8', fill: 'rgba(56,189,248,.13)'  },  // 6 sky cyan
+  { stroke: '#fb923c', fill: 'rgba(251,146,60,.13)'  },  // 7 solar orange
+  { stroke: '#a3e635', fill: 'rgba(163,230,53,.12)'  },  // 8 comet lime
+  { stroke: '#e879f9', fill: 'rgba(232,121,249,.12)' },  // 9 quasar pink
+  { stroke: '#22d3ee', fill: 'rgba(34,211,238,.12)'  },  // 10 aurora teal
+  { stroke: '#facc15', fill: 'rgba(250,204,21,.12)'  },  // 11 corona yellow
+  { stroke: '#818cf8', fill: 'rgba(129,140,248,.13)' },  // 12 galaxy indigo
 ];
 
 function getTier(tiers, score) {
