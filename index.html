@@ -1537,8 +1537,11 @@ function drawRadar(canvas, bm, results, selectedId) {
 
   // Models
   const visibleResults = results.filter(r => r._total !== undefined);
+  const crowded = visibleResults.length > 10;
+  const alphaFill = (fill, alpha) => fill.replace(/[\d.]+\)$/, `${alpha})`);
   visibleResults.forEach((res, idx) => {
-    const isSelected = selectedId === null || res.id === selectedId;
+    const hasSelection = selectedId !== null;
+    const isSelected = hasSelection && res.id === selectedId;
     const color = PALETTE[idx % PALETTE.length];
     const dimScores = computeDimensions(res, bm.dimensions, bm.questions);
 
@@ -1548,33 +1551,30 @@ function drawRadar(canvas, bm, results, selectedId) {
       i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
     });
     ctx.closePath();
-    const hasSelection = selectedId !== null;
     const dimmed = hasSelection && !isSelected;
-    ctx.fillStyle   = dimmed ? color.fill.replace(/[\d.]+\)$/, '0.05)') : color.fill;
-    ctx.strokeStyle = dimmed ? color.stroke.replace(/^(#[0-9a-f]{6})$/i, '$1') + '55' : color.stroke;
-    ctx.lineWidth   = dimmed ? 1.2 : (isSelected ? 2.2 : 1.8);
-    ctx.setLineDash(dimmed ? [5, 4] : []);
-    ctx.globalAlpha = dimmed ? 0.45 : 1;
+    ctx.fillStyle   = dimmed ? alphaFill(color.fill, 0.025) : alphaFill(color.fill, crowded ? 0.035 : 0.07);
+    ctx.strokeStyle = dimmed ? color.stroke.replace(/^(#[0-9a-f]{6})$/i, '$1') + '88' : color.stroke;
+    ctx.lineWidth   = dimmed ? (crowded ? 0.75 : 1) : (isSelected ? 2 : (crowded ? 0.85 : 1.15));
+    ctx.globalAlpha = dimmed ? 0.6 : (isSelected ? 1 : 0.72);
     ctx.fill();
     ctx.stroke();
-    ctx.setLineDash([]);
     ctx.globalAlpha = 1;
 
-    // Glow + dots for fully-visible models
-    if (!dimmed) {
+    // Glow + dots only for the focused model; all-model view stays light enough to compare.
+    if (isSelected) {
       ctx.shadowColor = color.stroke;
-      ctx.shadowBlur = isSelected ? 10 : 6;
+      ctx.shadowBlur = 9;
       ctx.strokeStyle = color.stroke;
-      ctx.lineWidth = isSelected ? 2.2 : 1.8;
+      ctx.lineWidth = 2;
       ctx.stroke();
       ctx.shadowBlur = 0;
       dimScores.forEach((d, i) => {
         const p = pt(i, r * d.pct);
         ctx.beginPath();
-        ctx.arc(p.x, p.y, isSelected ? 3.5 : 2.8, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, 3.4, 0, Math.PI * 2);
         ctx.fillStyle = color.stroke;
         ctx.shadowColor = color.stroke;
-        ctx.shadowBlur = isSelected ? 6 : 4;
+        ctx.shadowBlur = 6;
         ctx.fill();
         ctx.shadowBlur = 0;
       });
@@ -1939,7 +1939,7 @@ async function main() {
   window._allResults = results;
   window._familyOptions = buildFamilyOptions(results);
   window._activeFamilyKey = 'all';
-  window._selectedIds = new Set(results.map(r => r.id));
+  window._selectedIds = new Set(results.slice(0, 5).map(r => r.id));
 
   function visibleResults() {
     const key = window._activeFamilyKey || 'all';
@@ -1986,7 +1986,7 @@ async function main() {
   window._onFamilyChange = function(familyKey) {
     window._activeFamilyKey = familyKey || 'all';
     const visible = visibleResults();
-    window._selectedIds = new Set(visible.map(r => r.id));
+    window._selectedIds = new Set(visible.slice(0, 5).map(r => r.id));
     renderCurrentView();
   };
 
