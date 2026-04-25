@@ -263,6 +263,40 @@
     .stat-unit  { font-size: 14px; color: var(--text-3); margin-left: 3px; font-weight: 400; }
     .stat-sub   { font-size: 11px; color: var(--text-3); margin-top: 6px; }
 
+    /* ── Scoring rules ──────────────────────────────── */
+    .scoring-rules {
+      margin-bottom: 24px;
+    }
+    .rules-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .rule-item {
+      min-width: 0;
+      padding: 12px 14px;
+      border-radius: var(--r-sm);
+      background: rgba(127,179,255,.055);
+      border: 1px solid rgba(127,179,255,.14);
+    }
+    .rule-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--sirius);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .rule-text {
+      font-size: 12px;
+      line-height: 1.55;
+      color: var(--text-2);
+    }
+    .rule-text strong {
+      color: var(--text);
+      font-weight: 650;
+    }
+
     /* ── Main grid ────────────────────────────────── */
     .main-grid {
       display: grid;
@@ -273,9 +307,13 @@
     @media (max-width: 900px) {
       .main-grid { grid-template-columns: 1fr; }
       .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .rules-grid { grid-template-columns: 1fr 1fr; }
       .hero { flex-direction: column; }
       .hero-meta { align-items: flex-start; width: 100%; }
       .hero-video-wrap { width: 100%; max-width: 400px; }
+    }
+    @media (max-width: 560px) {
+      .rules-grid { grid-template-columns: 1fr; }
     }
 
     /* ── Panel ────────────────────────────────────── */
@@ -335,8 +373,20 @@
     .rank-1 { color: var(--nova); text-shadow: 0 0 8px rgba(252,211,77,.5); }
     .rank-2 { color: var(--sirius); }
     .rank-3 { color: var(--nebula); }
-    .model-cell .name { font-size: 14px; font-weight: 600; color: var(--text); }
-    .model-cell .version { font-size: 10.5px; color: var(--text-3); font-family: "JetBrains Mono","Fira Code",ui-monospace,monospace; margin-top: 2px; letter-spacing: .02em; }
+    .model-cell .name {
+      font-size: 13px;
+      line-height: 1.28;
+      font-weight: 650;
+      color: var(--text);
+    }
+    .model-cell .version {
+      font-size: 9.5px;
+      line-height: 1.35;
+      color: var(--text-3);
+      font-family: "JetBrains Mono","Fira Code",ui-monospace,monospace;
+      margin-top: 3px;
+      letter-spacing: 0;
+    }
     .provider-badge {
       display: inline-block;
       font-size: 10.5px;
@@ -435,6 +485,7 @@
     .lb-filter-bar {
       display: flex;
       align-items: center;
+      flex-wrap: wrap;
       gap: 8px;
       margin-bottom: 12px;
       padding: 0 2px;
@@ -459,6 +510,23 @@
       white-space: nowrap;
     }
     .lb-filter-btn:hover { border-color: var(--sirius); color: var(--sirius); }
+    .lb-family-select {
+      height: 25px;
+      min-width: 128px;
+      border-radius: var(--r-sm);
+      border: 1px solid rgba(127,179,255,.18);
+      background: rgba(127,179,255,.07);
+      color: var(--text-2);
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 2px 26px 2px 9px;
+      outline: none;
+      cursor: pointer;
+    }
+    .lb-family-select:focus {
+      border-color: var(--sirius);
+      box-shadow: 0 0 0 2px rgba(127,179,255,.12);
+    }
     .lb-sel-count {
       font-size: 10.5px;
       color: var(--text-3);
@@ -468,8 +536,8 @@
     }
     /* checkbox column */
     .lb-table th.cb-col, .lb-table td.cb-col {
-      width: 28px;
-      padding: 0 6px 0 2px;
+      width: 38px;
+      padding: 0 7px 0 12px;
     }
     .lb-checkbox {
       appearance: none;
@@ -501,6 +569,16 @@
     /* dim rows that are unchecked */
     .lb-table tr[data-id].lb-unselected { opacity: .38; }
     .lb-table tr[data-id].lb-unselected:hover { opacity: .7; }
+    @media (max-width: 1150px) {
+      .lb-table th { padding: 0 6px 10px; font-size: 10px; }
+      .lb-table td { padding: 10px 6px; }
+      .model-cell .name { font-size: 12px; line-height: 1.24; }
+      .model-cell .version { font-size: 9px; line-height: 1.3; }
+      .provider-badge { font-size: 9.5px; padding: 2px 7px; }
+      .score-cell { min-width: 96px; }
+      .score-num { width: 30px; font-size: 13px; }
+      .tier-chip { font-size: 9px; padding: 2px 6px; }
+    }
 
     /* ── Radar ────────────────────────────────────── */
     .radar-wrap { display: flex; flex-direction: column; align-items: center; }
@@ -1109,6 +1187,29 @@
     </div>
   </div>
 
+  <!-- Scoring rules -->
+  <div class="panel scoring-rules">
+    <div class="panel-title">◎ 评分规则</div>
+    <div class="rules-grid">
+      <div class="rule-item">
+        <div class="rule-label">Mode</div>
+        <div class="rule-text"><strong>Global Max</strong>：每个模型不限重试次数，记录该模型在当前题集上的最高分样本。</div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-label">Prompt</div>
+        <div class="rule-text">所有模型使用同一条自然赏析提示词，不进行定向追问或逐题提示。</div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-label">Judge</div>
+        <div class="rule-text">评分模型为 <strong>GPT-5.5</strong>，按 Q1-Q10 与 Bonus 得分点逐项判分。</div>
+      </div>
+      <div class="rule-item">
+        <div class="rule-label">Record</div>
+        <div class="rule-text">页面展示最高分对应的原始回答与评分摘录；结果用于比较发现上限，不代表单次稳定性。</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Main grid: table + radar -->
   <div class="main-grid">
     <!-- Leaderboard -->
@@ -1271,19 +1372,71 @@ const PALETTE = [
   { stroke: '#818cf8', fill: 'rgba(129,140,248,.13)' },  // 12 galaxy indigo
 ];
 
+const FAMILY_RULES = [
+  { key: 'claude',   label: 'Claude',   patterns: ['claude'] },
+  { key: 'gpt',      label: 'GPT',      patterns: ['gpt'] },
+  { key: 'deepseek', label: 'DeepSeek', patterns: ['deepseek'] },
+  { key: 'qwen',     label: 'Qwen',     patterns: ['qwen'] },
+  { key: 'glm',      label: 'GLM',      patterns: ['glm'] },
+  { key: 'grok',     label: 'Grok',     patterns: ['grok'] },
+  { key: 'gemini',   label: 'Gemini',   patterns: ['gemini'] },
+  { key: 'kimi',     label: 'Kimi',     patterns: ['kimi'] },
+  { key: 'minimax',  label: 'MiniMax',  patterns: ['minimax'] },
+  { key: 'mimo',     label: 'MiMo',     patterns: ['mimo'] },
+  { key: 'stepfun',  label: 'StepFun',  patterns: ['stepfun'] },
+  { key: 'doubao',   label: 'Doubao',   patterns: ['doubao'] },
+  { key: 'hunyuan',  label: '混元',     patterns: ['hunyuan', '混元', 'hy3'] },
+  { key: 'ling',     label: 'Ling',     patterns: ['ling'] },
+  { key: 'longcat',  label: 'LongCat',  patterns: ['longcat'] },
+];
+
 function getTier(tiers, score) {
   return tiers.find(t => score >= t.min && score <= t.max) || tiers[0];
 }
 
 function tierStyle(label) {
   const map = {
+    '表层赏析': { bg: 'rgba(148,163,184,.11)', color: '#94a3b8', border: 'rgba(148,163,184,.28)' },
+    '密码识别': { bg: 'rgba(127,179,255,.10)', color: '#7fb3ff', border: 'rgba(127,179,255,.32)' },
+    '信号结构': { bg: 'rgba(45,212,191,.12)', color: '#2dd4bf', border: 'rgba(45,212,191,.35)' },
     '表面理解': { bg: 'rgba(100,116,139,.12)', color: '#94a3b8', border: 'rgba(100,116,139,.3)' },
     '符号识别': { bg: 'rgba(127,179,255,.1)',   color: '#7fb3ff', border: 'rgba(127,179,255,.3)' },
     '语言深度': { bg: 'rgba(52,211,153,.1)',   color: '#34d399', border: 'rgba(52,211,153,.3)'  },
     '天文联结': { bg: 'rgba(252,211,77,.1)',   color: '#fcd34d', border: 'rgba(252,211,77,.3)'  },
     '完全解读': { bg: 'rgba(192,132,252,.12)', color: '#c084fc', border: 'rgba(192,132,252,.35)' },
+    '完整解读': { bg: 'rgba(192,132,252,.12)', color: '#c084fc', border: 'rgba(192,132,252,.35)' },
   };
   return map[label] || { bg: 'rgba(100,116,139,.12)', color: '#94a3b8', border: 'rgba(100,116,139,.3)' };
+}
+
+function modelFamily(res) {
+  const text = `${res.id || ''} ${res.model || ''} ${res.model_version || ''} ${res.provider || ''}`.toLowerCase();
+  const rule = FAMILY_RULES.find(f => f.patterns.some(p => text.includes(p)));
+  if (rule) return { key: rule.key, label: rule.label };
+
+  const fallback = modelDisplayName(res).split(/[\s._-]+/).filter(Boolean)[0] || 'Other';
+  const key = fallback.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'other';
+  return { key, label: fallback };
+}
+
+function buildFamilyOptions(results) {
+  const seen = new Map();
+  for (const res of results) {
+    const family = modelFamily(res);
+    const current = seen.get(family.key) || { ...family, count: 0 };
+    current.count += 1;
+    seen.set(family.key, current);
+  }
+
+  const ordered = FAMILY_RULES
+    .filter(rule => seen.has(rule.key))
+    .map(rule => seen.get(rule.key));
+  const orderedKeys = new Set(ordered.map(f => f.key));
+  const rest = [...seen.values()]
+    .filter(f => !orderedKeys.has(f.key))
+    .sort((a, b) => a.label.localeCompare(b.label));
+
+  return [{ key: 'all', label: '全部', count: results.length }, ...ordered, ...rest];
 }
 
 function computeTotals(result, questions) {
@@ -1481,15 +1634,26 @@ function renderLeaderboard(bm, sortedResults) {
       </tr>`;
   }).join('');
 
-  const selCount = window._selectedIds ? window._selectedIds.size : sortedResults.length;
-  const allChecked = window._selectedIds ? window._selectedIds.size === sortedResults.length : true;
+  const selectedVisibleCount = window._selectedIds
+    ? sortedResults.filter(r => window._selectedIds.has(r.id)).length
+    : sortedResults.length;
+  const allChecked = selectedVisibleCount === sortedResults.length;
+  const familyOptions = window._familyOptions || [{ key: 'all', label: '全部', count: sortedResults.length }];
+  const activeFamily = window._activeFamilyKey || 'all';
+  const familyOptionHtml = familyOptions.map(f => (
+    `<option value="${escHtml(f.key)}"${f.key === activeFamily ? ' selected' : ''}>${escHtml(f.label)} (${f.count})</option>`
+  )).join('');
 
   container.innerHTML = `
     <div class="lb-filter-bar">
+      <span class="lb-filter-label">模型系列</span>
+      <select class="lb-family-select" id="lb-family-select" aria-label="模型系列">
+        ${familyOptionHtml}
+      </select>
       <span class="lb-filter-label">显示模型</span>
       <button class="lb-filter-btn" id="lb-sel-all">全选</button>
       <button class="lb-filter-btn" id="lb-sel-none">全不选</button>
-      <span class="lb-sel-count" id="lb-sel-count">${selCount} / ${sortedResults.length} 已选</span>
+      <span class="lb-sel-count" id="lb-sel-count">${selectedVisibleCount} / ${sortedResults.length} 已选</span>
     </div>
     <table class="lb-table">
       <thead>
@@ -1508,7 +1672,7 @@ function renderLeaderboard(bm, sortedResults) {
 
   /* ── checkbox interaction ── */
   function syncCountDisplay() {
-    const cnt = window._selectedIds ? window._selectedIds.size : 0;
+    const cnt = window._selectedIds ? sortedResults.filter(r => window._selectedIds.has(r.id)).length : 0;
     const el = container.querySelector('#lb-sel-count');
     if (el) el.textContent = `${cnt} / ${sortedResults.length} 已选`;
     const cbAll = container.querySelector('#lb-cb-all');
@@ -1530,6 +1694,13 @@ function renderLeaderboard(bm, sortedResults) {
   container.querySelectorAll('.lb-checkbox[data-id]').forEach(cb => {
     cb.addEventListener('change', () => toggleId(cb.dataset.id, cb.checked));
   });
+
+  const familySelect = container.querySelector('#lb-family-select');
+  if (familySelect) {
+    familySelect.addEventListener('change', () => {
+      if (window._onFamilyChange) window._onFamilyChange(familySelect.value);
+    });
+  }
 
   // Header "select all" checkbox
   const cbAll = container.querySelector('#lb-cb-all');
@@ -1580,6 +1751,7 @@ function renderLeaderboard(bm, sortedResults) {
       const res = sortedResults.find(r => r.id === id);
       const filtered = sortedResults.filter(r => window._selectedIds && window._selectedIds.has(r.id));
       renderDetail(bm, res, filtered.length ? filtered : sortedResults);
+      renderLegend(filtered.length ? filtered : sortedResults);
       container.querySelectorAll('tr[data-id]').forEach(r => r.classList.remove('active'));
       tr.classList.add('active');
       const canvas = document.getElementById('radar-canvas');
@@ -1764,35 +1936,62 @@ async function main() {
     _total: computeTotals(r, bm.questions),
   })).sort((a, b) => b._total - a._total);
 
-  // Initialize selection state: top 5 models selected by default
-  window._selectedIds = new Set(results.slice(0, 5).map(r => r.id));
+  window._allResults = results;
+  window._familyOptions = buildFamilyOptions(results);
+  window._activeFamilyKey = 'all';
+  window._selectedIds = new Set(results.map(r => r.id));
+
+  function visibleResults() {
+    const key = window._activeFamilyKey || 'all';
+    if (key === 'all') return results;
+    return results.filter(r => modelFamily(r).key === key);
+  }
+
+  function selectedVisibleResults(visible) {
+    const selected = visible.filter(r => window._selectedIds.has(r.id));
+    return selected.length ? selected : visible;
+  }
+
+  function renderCurrentView(activeId = null) {
+    const visible = visibleResults();
+    const selected = selectedVisibleResults(visible);
+    const focusedId = activeId && selected.some(r => r.id === activeId) ? activeId : null;
+    const focused = focusedId ? selected.find(r => r.id === focusedId) : selected[0];
+    const canvas = document.getElementById('radar-canvas');
+
+    renderStats(bm, visible);
+    renderLeaderboard(bm, visible);
+    renderLegend(selected);
+    drawRadar(canvas, bm, selected, focusedId);
+    renderDetail(bm, focused, selected);
+
+    const activeRow = document.querySelector(`tr[data-id="${focused?.id || ''}"]`);
+    if (activeRow) activeRow.classList.add('active');
+  }
 
   // Called whenever selection changes — re-renders radar + detail
   window._onSelectionChange = function() {
-    const filtered = results.filter(r => window._selectedIds.has(r.id));
+    const visible = visibleResults();
+    const filtered = selectedVisibleResults(visible);
     const canvas = document.getElementById('radar-canvas');
     // Preserve currently active row highlight
     const activeRow = document.querySelector('tr[data-id].active');
     const activeId  = activeRow ? activeRow.dataset.id : null;
-    const radarId   = (activeId && window._selectedIds.has(activeId)) ? activeId : null;
-    drawRadar(canvas, bm, filtered.length ? filtered : results, radarId);
-    renderDetail(bm, filtered.length ? filtered[0] : results[0], filtered.length ? filtered : results);
+    const radarId   = (activeId && filtered.some(r => r.id === activeId)) ? activeId : null;
+    drawRadar(canvas, bm, filtered, radarId);
+    renderLegend(filtered);
+    renderDetail(bm, radarId ? filtered.find(r => r.id === radarId) : filtered[0], filtered);
   };
 
-  renderStats(bm, results);
-  renderLeaderboard(bm, results);
-  renderLegend(results);
-
-  const canvas = document.getElementById('radar-canvas');
-
-  // Initial radar: show all models together
-  drawRadar(canvas, bm, results, null);
+  window._onFamilyChange = function(familyKey) {
+    window._activeFamilyKey = familyKey || 'all';
+    const visible = visibleResults();
+    window._selectedIds = new Set(visible.map(r => r.id));
+    renderCurrentView();
+  };
 
   if (results.length > 0) {
-    renderDetail(bm, results[0], results);
-    // Keep radar showing all models on load; don't auto-select
-    const firstRow = document.querySelector('tr[data-id]');
-    if (firstRow) firstRow.classList.add('active');
+    renderCurrentView();
   }
 }
 
