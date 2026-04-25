@@ -9,7 +9,11 @@
 ```
 data/
   benchmark.json   # Benchmark 定义：题目、维度、等级（稳定，少改动）
-  results.json     # 模型测评结果数组（频繁追加）
+  results/         # 单模型测评源文件：每个模型一份 JSON（人工编辑）
+  results.json     # 页面发布用聚合文件，由 scripts/build_results.py 生成
+scripts/
+  build_results.py     # 合并 data/results/*.json -> data/results.json
+  validate_results.py  # 只校验单模型源文件，不改聚合文件
 ```
 
 ---
@@ -26,7 +30,7 @@ python3 -m http.server 8080
 
 ## 添加模型测评结果
 
-编辑 `data/results.json`，在数组末尾追加一条记录：
+在 `data/results/` 下新增一个以模型 `id` 命名的文件，例如 `data/results/gpt-4o-2024-11-20.json`：
 
 ```json
 {
@@ -53,10 +57,17 @@ python3 -m http.server 8080
 ```
 
 **字段说明**
-- `id` — 唯一标识符，不能重复
+- `id` — 唯一标识符，不能重复，并且必须与文件名一致
 - `scores` — 各题得分，必须覆盖所有题目（Q1–Q10），允许小数（如 `1.5`、`0.5`）；0 分写 `0`，不可省略
 
-刷新页面即可看到新模型出现在排行榜和雷达图中。
+更新后先校验，再生成页面读取的聚合文件：
+
+```bash
+python3 scripts/validate_results.py
+python3 scripts/build_results.py
+```
+
+刷新页面即可看到新模型出现在排行榜和雷达图中。不要手动编辑 `data/results.json`；它是发布产物。
 
 ---
 
@@ -147,7 +158,7 @@ python3 -m http.server 8080
 
 ## JSON 特殊字符转义规范
 
-`data/benchmark.json` 和 `data/results.json` 均为标准 JSON，**所有字符串值必须合法转义**，否则页面会静默白屏或数据丢失。
+`data/benchmark.json`、`data/results/*.json` 和生成后的 `data/results.json` 均为标准 JSON，**所有字符串值必须合法转义**，否则页面会静默白屏或数据丢失。
 
 ### 常见踩坑
 
@@ -165,9 +176,10 @@ python3 -m http.server 8080
 # 验证 JSON 合法性（python3 内置，无需安装）
 python3 -m json.tool data/benchmark.json > /dev/null && echo "OK"
 python3 -m json.tool data/results.json  > /dev/null && echo "OK"
+python3 scripts/validate_results.py
 ```
 
-如果输出 `OK` 说明文件合法；否则会打印出错行号，定位修复后再刷新页面。
+如果前两条输出 `OK`、校验脚本输出 `validated ... result files`，说明文件合法；否则会打印出错位置，定位修复后再刷新页面。
 
 ---
 
