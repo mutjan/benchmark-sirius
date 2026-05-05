@@ -267,6 +267,65 @@
     .scoring-rules {
       margin-bottom: 24px;
     }
+    .leaderboard-switch {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+      padding: 14px 16px;
+      border-radius: var(--r);
+      background: rgba(127,179,255,.045);
+      border: 1px solid var(--border);
+    }
+    .leaderboard-switch-main {
+      min-width: 0;
+    }
+    .leaderboard-switch-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 4px;
+    }
+    .leaderboard-switch-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .leaderboard-switch-desc {
+      font-size: 11px;
+      color: var(--text-3);
+      margin-top: 2px;
+    }
+    .leaderboard-switch-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    .leaderboard-switch-btn {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 99px;
+      color: var(--text-2);
+      background: rgba(127,179,255,.06);
+      border: 1px solid rgba(127,179,255,.18);
+      transition: border-color .15s, color .15s, background .15s;
+    }
+    .leaderboard-switch-btn:hover {
+      color: var(--sirius);
+      border-color: var(--sirius);
+      background: rgba(127,179,255,.1);
+    }
+    .leaderboard-switch-btn.active {
+      color: #fff;
+      background: linear-gradient(135deg, var(--sirius-2), var(--sirius));
+      border-color: transparent;
+      box-shadow: 0 0 12px rgba(127,179,255,.25);
+    }
     .rules-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -311,6 +370,8 @@
       .hero { flex-direction: column; }
       .hero-meta { align-items: flex-start; width: 100%; }
       .hero-video-wrap { width: 100%; max-width: 400px; }
+      .leaderboard-switch { flex-direction: column; align-items: flex-start; }
+      .leaderboard-switch-actions { justify-content: flex-start; }
     }
     @media (max-width: 560px) {
       .rules-grid { grid-template-columns: 1fr; }
@@ -398,8 +459,19 @@
       white-space: nowrap;
     }
     .test-date { font-size: 12px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+    .attempt-count {
+      margin-top: 2px;
+      font-size: 10px;
+      color: var(--text-3);
+      white-space: nowrap;
+    }
     .score-cell { min-width: 130px; }
+    .score-cell.range-only-cell {
+      min-width: 78px;
+      width: 84px;
+    }
     .score-bar-wrap { display: flex; align-items: center; gap: 8px; }
+    .score-bar-wrap.range-only { justify-content: flex-end; }
     .score-bar-bg {
       flex: 1;
       height: 5px;
@@ -418,9 +490,14 @@
       font-size: 14px;
       font-weight: 700;
       color: var(--text);
-      width: 36px;
+      min-width: 36px;
       text-align: right;
       font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .score-num.range {
+      min-width: 60px;
+      font-size: 13px;
     }
     .tier-chip {
       font-size: 10px;
@@ -576,13 +653,15 @@
       .model-cell .version { font-size: 9px; line-height: 1.3; }
       .provider-badge { font-size: 9.5px; padding: 2px 7px; }
       .score-cell { min-width: 96px; }
+      .score-cell.range-only-cell { min-width: 74px; width: 80px; }
       .score-num { width: 30px; font-size: 13px; }
+      .score-num.range { width: 58px; font-size: 12px; }
       .tier-chip { font-size: 9px; padding: 2px 6px; }
     }
 
     /* ── Radar ────────────────────────────────────── */
     .radar-wrap { display: flex; flex-direction: column; align-items: center; }
-    #radar-canvas { width: 100%; max-width: 320px; aspect-ratio: 1 / 1; }
+    #radar-canvas { width: 100%; max-width: 560px; aspect-ratio: 1 / 1; }
     .radar-legend {
       display: flex;
       flex-wrap: wrap;
@@ -1163,6 +1242,16 @@
     </div>
   </div>
 
+  <!-- Leaderboard switch -->
+  <div class="leaderboard-switch" id="leaderboard-switch">
+    <div class="leaderboard-switch-main">
+      <div class="leaderboard-switch-label">榜单版本</div>
+      <div class="leaderboard-switch-title" id="leaderboard-switch-title">—</div>
+      <div class="leaderboard-switch-desc" id="leaderboard-switch-desc">—</div>
+    </div>
+    <div class="leaderboard-switch-actions" id="leaderboard-switch-actions"></div>
+  </div>
+
   <!-- Stats -->
   <div class="stats-row">
     <div class="stat-card">
@@ -1193,11 +1282,11 @@
     <div class="rules-grid">
       <div class="rule-item">
         <div class="rule-label">Mode</div>
-        <div class="rule-text"><strong>Global Max</strong>：每个模型不限重试次数，记录该模型在当前题集上的最高分样本。</div>
+        <div class="rule-text" id="rule-mode"><strong>Global Max</strong>：每个模型不限重试次数，记录该模型在当前题集上的最高分样本。</div>
       </div>
       <div class="rule-item">
         <div class="rule-label">Prompt</div>
-        <div class="rule-text">所有模型使用同一条自然赏析提示词，不进行定向追问或逐题提示。</div>
+        <div class="rule-text" id="rule-prompt">所有模型使用同一条自然赏析提示词，不进行定向追问或逐题提示。</div>
       </div>
       <div class="rule-item">
         <div class="rule-label">Judge</div>
@@ -1222,7 +1311,7 @@
 
     <!-- Radar -->
     <div class="panel">
-      <div class="panel-title">◎ 能力维度星图</div>
+      <div class="panel-title" id="chart-title">◎ 能力维度星图</div>
       <div class="radar-wrap">
         <canvas id="radar-canvas" width="320" height="320"></canvas>
         <div class="radar-legend" id="radar-legend"></div>
@@ -1239,11 +1328,11 @@
   </div>
 
   <div class="footer">
-    星图数据：<a href="data/benchmark.json" target="_blank">benchmark.json</a>
+    星图数据：<a href="data/benchmark.json" target="_blank" id="footer-benchmark-link">benchmark.json</a>
     &nbsp;·&nbsp;
-    <a href="data/results.json" target="_blank">results.json</a>
+    <a href="data/results.json" target="_blank" id="footer-results-link">results.json</a>
     &nbsp;·&nbsp;
-    新增模型：编辑 <code>results.json</code>，刷新即可
+    新增模型：编辑对应榜单源文件，刷新即可
   </div>
 </div>
 
@@ -1356,6 +1445,29 @@
    BENCHMARK APP
 ═════════════════════════════════════════════════════ */
 
+const LEADERBOARDS = [
+  {
+    key: 'v2.1',
+    label: '自然发现版 v2.1',
+    shortLabel: 'v2.1 自然发现',
+    description: '原始极简提示词，测模型自发发现隐藏层的能力。',
+    benchmarkUrl: 'data/benchmark.json',
+    resultsUrl: 'data/results.json',
+    promptRule: '所有模型使用同一条极简自然赏析提示词，不进行定向追问或逐题提示。',
+  },
+  {
+    key: 'v2.2',
+    label: '新 Prompt 试验版 v2.2',
+    shortLabel: 'v2.2 新 Prompt',
+    description: '给出隐藏信息、结构设计、意象关联和深层含义四个自然赏析方向；不限制展开方式。',
+    benchmarkUrl: 'data/benchmark-v2.2.json',
+    resultsUrl: 'data/results-v2.2.json',
+    promptRule: '所有模型使用同一条轻提示自然赏析词，只给出分析方向，不要求依据格式或推测边界。',
+    aggregateAttempts: true,
+  },
+];
+const DEFAULT_LEADERBOARD_KEY = 'v2.2';
+
 /* Color palette for models — 12 distinct cosmic tones, no repeats up to 12 models */
 const PALETTE = [
   { stroke: '#7fb3ff', fill: 'rgba(127,179,255,.14)' },  // 1 sirius blue
@@ -1389,6 +1501,42 @@ const FAMILY_RULES = [
   { key: 'ling',     label: 'Ling',     patterns: ['ling'] },
   { key: 'longcat',  label: 'LongCat',  patterns: ['longcat'] },
 ];
+
+function currentLeaderboardKey() {
+  const params = new URLSearchParams(window.location.search);
+  const queryKey = params.get('board');
+  if (LEADERBOARDS.some(b => b.key === queryKey)) return queryKey;
+  const hashKey = window.location.hash.replace(/^#/, '');
+  if (LEADERBOARDS.some(b => b.key === hashKey)) return hashKey;
+  return DEFAULT_LEADERBOARD_KEY;
+}
+
+function getLeaderboardConfig(key = currentLeaderboardKey()) {
+  return LEADERBOARDS.find(b => b.key === key) || LEADERBOARDS.find(b => b.key === DEFAULT_LEADERBOARD_KEY) || LEADERBOARDS[0];
+}
+
+function switchLeaderboard(key) {
+  const params = new URLSearchParams(window.location.search);
+  if (key === DEFAULT_LEADERBOARD_KEY) params.delete('board');
+  else params.set('board', key);
+  const query = params.toString();
+  window.location.href = `${window.location.pathname}${query ? '?' + query : ''}`;
+}
+
+function renderLeaderboardSwitch(activeBoard) {
+  const title = document.getElementById('leaderboard-switch-title');
+  const desc = document.getElementById('leaderboard-switch-desc');
+  const actions = document.getElementById('leaderboard-switch-actions');
+  if (!title || !desc || !actions) return;
+  title.textContent = activeBoard.label;
+  desc.textContent = activeBoard.description;
+  actions.innerHTML = LEADERBOARDS.map(board => `
+    <button class="leaderboard-switch-btn ${board.key === activeBoard.key ? 'active' : ''}"
+      onclick="switchLeaderboard('${escHtml(board.key)}')">
+      ${escHtml(board.shortLabel)}
+    </button>
+  `).join('');
+}
 
 function getTier(tiers, score) {
   return tiers.find(t => score >= t.min && score <= t.max) || tiers[0];
@@ -1445,12 +1593,300 @@ function computeTotals(result, questions) {
   return total;
 }
 
+function formatScore(value) {
+  if (value === undefined || value === null) return '—';
+  const n = Number(value);
+  if (!Number.isFinite(n)) return '—';
+  return Number.isInteger(n) ? String(n) : String(Number(n.toFixed(2)));
+}
+
+function attemptGroupKey(res) {
+  return [
+    modelDisplayName(res),
+    res.model_version || '',
+    res.provider || '',
+    res.api_endpoint || '',
+  ].map(v => String(v).trim().toLowerCase()).join('｜');
+}
+
+function summarizeAttemptRange(attempts) {
+  const totals = attempts.map(a => a._total);
+  const min = Math.min(...totals);
+  const max = Math.max(...totals);
+  return {
+    min,
+    max,
+    label: min === max ? formatScore(max) : `${formatScore(min)}–${formatScore(max)}`,
+  };
+}
+
+function aggregateAttempts(rawResults, enabled) {
+  if (!enabled) {
+    return rawResults.map(r => ({
+      ...r,
+      _attempts: [r],
+      _attemptCount: 1,
+      _scoreMin: r._total,
+      _scoreMax: r._total,
+      _scoreRangeLabel: formatScore(r._total),
+    }));
+  }
+
+  const groups = new Map();
+  for (const res of rawResults) {
+    const key = attemptGroupKey(res);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(res);
+  }
+
+  return [...groups.values()].map(attempts => {
+    attempts.sort((a, b) =>
+      (b._total - a._total) ||
+      String(b.test_date || '').localeCompare(String(a.test_date || '')) ||
+      String(a.id || '').localeCompare(String(b.id || ''))
+    );
+    const best = attempts[0];
+    const range = summarizeAttemptRange(attempts);
+    return {
+      ...best,
+      _attempts: attempts,
+      _attemptCount: attempts.length,
+      _scoreMin: range.min,
+      _scoreMax: range.max,
+      _scoreRangeLabel: range.label,
+    };
+  }).sort((a, b) =>
+    ((b._scoreMax ?? b._total) - (a._scoreMax ?? a._total)) ||
+    ((b._scoreMin ?? b._total) - (a._scoreMin ?? a._total)) ||
+    modelDisplayName(a).localeCompare(modelDisplayName(b))
+  );
+}
+
 function computeDimensions(result, dimensions, questions) {
   return dimensions.map(dim => {
     const qs = questions.filter(q => q.dimension === dim.key);
     const got = qs.reduce((s, q) => s + (result.scores[q.id] || 0), 0);
     return { key: dim.key, label: dim.label, score: got, max: dim.max, pct: got / dim.max };
   });
+}
+
+function attemptTotals(res) {
+  const attempts = Array.isArray(res._attempts) && res._attempts.length ? res._attempts : [res];
+  return attempts
+    .map(a => Number(a._total ?? res._total ?? 0))
+    .filter(Number.isFinite)
+    .sort((a, b) => a - b);
+}
+
+function quantile(sorted, q) {
+  if (!sorted.length) return 0;
+  if (sorted.length === 1) return sorted[0];
+  const pos = (sorted.length - 1) * q;
+  const lo = Math.floor(pos);
+  const hi = Math.ceil(pos);
+  const frac = pos - lo;
+  return sorted[lo] + (sorted[hi] - sorted[lo]) * frac;
+}
+
+function scoreDistributionStats(res) {
+  const values = attemptTotals(res);
+  return {
+    n: values.length,
+    values,
+    min: values[0] ?? 0,
+    q1: quantile(values, 0.25),
+    median: quantile(values, 0.5),
+    q3: quantile(values, 0.75),
+    max: values[values.length - 1] ?? 0,
+  };
+}
+
+function drawAngledLabel(ctx, text, x, y, color) {
+  const cleaned = String(text || '').replace(/-/g, ' ');
+  const words = cleaned.split(/\s+/).filter(Boolean);
+  const lines = [];
+  let current = '';
+  for (const word of words) {
+    const next = current ? `${current} ${word}` : word;
+    if (next.length > 13 && current) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = next;
+    }
+  }
+  if (current) lines.push(current);
+  const visible = lines.slice(0, 3);
+  if (lines.length > 3) visible[2] = visible[2].slice(0, 11) + '…';
+
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(-Math.PI / 3.2);
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+  ctx.font = '650 10.5px Inter, system-ui, sans-serif';
+  ctx.fillStyle = color;
+  visible.forEach((line, i) => ctx.fillText(line, 0, i * 12));
+  ctx.restore();
+}
+
+function drawScoreDistribution(canvas, bm, results, selectedId) {
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = Math.max(320, Math.min(560, canvas.parentElement?.clientWidth || canvas.offsetWidth || 520));
+  const H = Math.max(440, Math.min(560, W * 1.05));
+
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+
+  const title = document.getElementById('chart-title');
+  if (title) title.textContent = '◎ 分数稳定性 Box Plot';
+
+  const left = 42;
+  const right = 18;
+  const top = 46;
+  const bottom = 142;
+  const plotW = Math.max(150, W - left - right);
+  const plotH = Math.max(160, H - top - bottom);
+  const maxScore = bm.total_points;
+  const y = (score) => top + (1 - Math.max(0, Math.min(maxScore, score)) / maxScore) * plotH;
+  const slotW = plotW / Math.max(1, results.length);
+
+  ctx.fillStyle = 'rgba(6,8,15,0.4)';
+  ctx.fillRect(left, top, plotW, plotH);
+
+  ctx.font = '600 11px Inter, system-ui, sans-serif';
+  ctx.textBaseline = 'middle';
+  [0, .25, .5, .75, 1].forEach(t => {
+    const score = maxScore * t;
+    const gy = y(score);
+    ctx.beginPath();
+    ctx.moveTo(left, gy);
+    ctx.lineTo(left + plotW, gy);
+    ctx.strokeStyle = t === 0 || t === 1 ? 'rgba(127,179,255,.28)' : 'rgba(127,179,255,.10)';
+    ctx.lineWidth = t === 0 || t === 1 ? 1.2 : 0.8;
+    ctx.stroke();
+    ctx.fillStyle = '#6f82a8';
+    ctx.textAlign = 'right';
+    ctx.fillText(formatScore(score), left - 8, gy);
+  });
+
+  ctx.fillStyle = '#8fa4cc';
+  ctx.textAlign = 'left';
+  ctx.fillText('总分分布', left, 18);
+  ctx.fillStyle = '#64748b';
+  ctx.font = '500 10px Inter, system-ui, sans-serif';
+  ctx.fillText('≥5次: 箱线图 · 2-4次: 最低/中位/最高 · 1次: 单线', left, 33);
+
+  results.forEach((res, idx) => {
+    const color = PALETTE[idx % PALETTE.length];
+    const stats = scoreDistributionStats(res);
+    const cx = left + slotW * (idx + 0.5);
+    const boxW = Math.max(8, Math.min(24, slotW * 0.36));
+    const capW = Math.max(12, Math.min(28, slotW * 0.46));
+    const hasSelection = selectedId !== null;
+    const isSelected = hasSelection && res.id === selectedId;
+    const dimmed = hasSelection && !isSelected;
+    const alpha = dimmed ? 0.42 : 1;
+
+    ctx.globalAlpha = alpha;
+    ctx.font = '500 9px Inter, system-ui, sans-serif';
+    ctx.fillStyle = '#7b8fb9';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText(`${stats.n}次`, cx, top + plotH + 10);
+    const name = modelDisplayName(res);
+    drawAngledLabel(ctx, name, cx + 10, top + plotH + 76, isSelected ? color.stroke : '#c6d3ee');
+
+    ctx.strokeStyle = color.stroke;
+    ctx.fillStyle = color.fill;
+    ctx.lineCap = 'round';
+
+    if (stats.n >= 5) {
+      const minY = y(stats.min), q1Y = y(stats.q1), medY = y(stats.median), q3Y = y(stats.q3), maxY = y(stats.max);
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(cx, maxY);
+      ctx.lineTo(cx, minY);
+      ctx.stroke();
+      [minY, maxY].forEach(ty => {
+        ctx.beginPath();
+        ctx.moveTo(cx - capW / 2, ty);
+        ctx.lineTo(cx + capW / 2, ty);
+        ctx.stroke();
+      });
+      ctx.fillStyle = color.fill.replace(/[\d.]+\)$/, `${dimmed ? 0.06 : 0.16})`);
+      ctx.strokeStyle = color.stroke;
+      ctx.lineWidth = isSelected ? 2 : 1.3;
+      ctx.beginPath();
+      ctx.roundRect(cx - boxW / 2, q3Y, boxW, Math.max(2, q1Y - q3Y), 4);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx - boxW / 2 - 3, medY);
+      ctx.lineTo(cx + boxW / 2 + 3, medY);
+      ctx.lineWidth = isSelected ? 2.4 : 1.8;
+      ctx.stroke();
+      ctx.fillStyle = '#dbeafe';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.font = '600 10px Inter, system-ui, sans-serif';
+      ctx.fillText(`med ${formatScore(stats.median)}`, cx, maxY - 7);
+    } else if (stats.n >= 2) {
+      const minY = y(stats.min), medY = y(stats.median), maxY = y(stats.max);
+      ctx.lineWidth = isSelected ? 2.2 : 1.5;
+      ctx.beginPath();
+      ctx.moveTo(cx, maxY);
+      ctx.lineTo(cx, minY);
+      ctx.stroke();
+      [minY, maxY].forEach(ty => {
+        ctx.beginPath();
+        ctx.moveTo(cx - capW / 2, ty);
+        ctx.lineTo(cx + capW / 2, ty);
+        ctx.stroke();
+      });
+      ctx.beginPath();
+      ctx.arc(cx, medY, isSelected ? 4.5 : 3.8, 0, Math.PI * 2);
+      ctx.fillStyle = color.stroke;
+      ctx.fill();
+      ctx.fillStyle = '#dbeafe';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.font = '600 10px Inter, system-ui, sans-serif';
+      ctx.fillText(`${formatScore(stats.min)}–${formatScore(stats.max)}`, cx, maxY - 7);
+    } else {
+      const sy = y(stats.median);
+      ctx.lineWidth = isSelected ? 2.4 : 1.6;
+      ctx.beginPath();
+      ctx.moveTo(cx - capW / 2, sy);
+      ctx.lineTo(cx + capW / 2, sy);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx, sy - 3);
+      ctx.lineTo(cx, sy + 3);
+      ctx.stroke();
+      ctx.fillStyle = '#dbeafe';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.font = '600 10px Inter, system-ui, sans-serif';
+      ctx.fillText(formatScore(stats.median), cx, sy - 7);
+    }
+    ctx.globalAlpha = 1;
+  });
+}
+
+function drawBenchmarkChart(canvas, bm, results, selectedId) {
+  const board = window._currentLeaderboard || getLeaderboardConfig(DEFAULT_LEADERBOARD_KEY);
+  if (board.aggregateAttempts) drawScoreDistribution(canvas, bm, results, selectedId);
+  else {
+    const title = document.getElementById('chart-title');
+    if (title) title.textContent = '◎ 能力维度星图';
+    drawRadar(canvas, bm, results, selectedId);
+  }
 }
 
 /* ── Radar: cosmic style ───────────────────────────── */
@@ -1590,11 +2026,20 @@ function renderLeaderboard(bm, sortedResults) {
     return;
   }
 
+  const board = window._currentLeaderboard || getLeaderboardConfig(DEFAULT_LEADERBOARD_KEY);
+  const scoreHeader = board.aggregateAttempts ? `区间 / ${bm.total_points}` : `总分 / ${bm.total_points}`;
   const rows = sortedResults.map((res, idx) => {
     const rank    = idx + 1;
-    const pct     = (res._total / bm.total_points * 100).toFixed(0);
-    const tier    = getTier(bm.tiers, res._total);
+    const scoreMax = res._scoreMax ?? res._total;
+    const scoreMin = res._scoreMin ?? res._total;
+    const scoreRangeLabel = res._scoreRangeLabel || formatScore(res._total);
+    const hasRange = (res._attemptCount || 1) > 1 && scoreMin !== scoreMax;
+    const pct     = (scoreMax / bm.total_points * 100).toFixed(0);
+    const tier    = getTier(bm.tiers, scoreMax);
     const ts      = tierStyle(tier.label);
+    const attemptTitle = (res._attemptCount || 1) > 1
+      ? `${res._attemptCount} 次测试：最低 ${formatScore(scoreMin)}，最高 ${formatScore(scoreMax)}；详情展示最高分答案`
+      : `得分 ${formatScore(scoreMax)}`;
 
     const dotHtml = bm.questions.map(q => {
       const s = res.scores[q.id] ?? 0;
@@ -1619,11 +2064,14 @@ function renderLeaderboard(bm, sortedResults) {
           </div>
         </td>
         <td><span class="provider-badge">${escHtml(res.provider)}</span></td>
-        <td><span class="test-date">${escHtml(res.test_date)}</span></td>
-        <td class="score-cell">
-          <div class="score-bar-wrap">
-            <div class="score-bar-bg"><div class="score-bar-fill" style="width:${pct}%"></div></div>
-            <div class="score-num">${res._total}</div>
+        <td>
+          <span class="test-date">${escHtml(res.test_date)}</span>
+          ${(res._attemptCount || 1) > 1 ? `<div class="attempt-count">${res._attemptCount} 次测试</div>` : ''}
+        </td>
+        <td class="score-cell ${board.aggregateAttempts ? 'range-only-cell' : ''}">
+          <div class="score-bar-wrap ${board.aggregateAttempts ? 'range-only' : ''}">
+            ${board.aggregateAttempts ? '' : `<div class="score-bar-bg"><div class="score-bar-fill" style="width:${pct}%"></div></div>`}
+            <div class="score-num ${hasRange ? 'range' : ''}" title="${escHtml(attemptTitle)}">${escHtml(scoreRangeLabel)}</div>
           </div>
         </td>
         <td>
@@ -1663,7 +2111,7 @@ function renderLeaderboard(bm, sortedResults) {
           <th>模型</th>
           <th>供应商</th>
           <th>测试时间</th>
-          <th>总分 / ${bm.total_points}</th>
+          <th>${scoreHeader}</th>
           <th>级别</th>
         </tr>
       </thead>
@@ -1755,7 +2203,7 @@ function renderLeaderboard(bm, sortedResults) {
       container.querySelectorAll('tr[data-id]').forEach(r => r.classList.remove('active'));
       tr.classList.add('active');
       const canvas = document.getElementById('radar-canvas');
-      drawRadar(canvas, bm, filtered.length ? filtered : sortedResults, id);
+      drawBenchmarkChart(canvas, bm, filtered.length ? filtered : sortedResults, id);
     });
   });
 }
@@ -1779,12 +2227,16 @@ function renderDetail(bm, selectedRes, allResults) {
     const fullAnswerBtn = hasFullAnswer
       ? `<button class="btn-full-answer" onclick="openFullAnswerModal('${safeId}')">▦ 完整答案</button>`
       : '';
+    const attemptMeta = (res._attemptCount || 1) > 1
+      ? `<div class="model-col-score">区间 ${escHtml(res._scoreRangeLabel)} · 详情为最高分答案</div>`
+      : '';
     return `
       <th class="model-col">
         <div class="model-col-header">
           <div class="model-col-name" style="color:${color.stroke}">${escHtml(res.model)}</div>
           <div class="model-col-meta">${escHtml(res.provider)} · ${escHtml(res.notes||res.test_date)}</div>
-          <div class="model-col-score">${res._total} / ${bm.total_points} 分</div>
+          <div class="model-col-score">${formatScore(res._total)} / ${bm.total_points} 分</div>
+          ${attemptMeta}
           ${fullAnswerBtn}
         </div>
       </th>`;
@@ -1858,38 +2310,66 @@ function renderDetail(bm, selectedRes, allResults) {
 /* ── Radar legend ──────────────────────────────────── */
 function renderLegend(results) {
   const el = document.getElementById('radar-legend');
+  const board = window._currentLeaderboard || getLeaderboardConfig(DEFAULT_LEADERBOARD_KEY);
+  if (board.aggregateAttempts) {
+    el.innerHTML = '';
+    return;
+  }
   el.innerHTML = results.map((res, idx) => {
     const c = PALETTE[idx % PALETTE.length];
+    const rangeSuffix = (res._attemptCount || 1) > 1 ? ` (${res._scoreRangeLabel})` : '';
     return `<div class="legend-item">
       <div class="legend-swatch" style="background:${c.stroke};box-shadow:0 0 4px ${c.stroke}80"></div>
-      <span>${escHtml(res.model)}</span>
+      <span>${escHtml(res.model)}${escHtml(rangeSuffix)}</span>
     </div>`;
   }).join('');
 }
 
 /* ── Stats ─────────────────────────────────────────── */
 function renderStats(bm, results) {
-  const totals = results.map(r => r._total);
-  const high   = Math.max(...totals);
-  const low    = Math.min(...totals);
-  const avg    = (totals.reduce((a, b) => a + b, 0) / totals.length).toFixed(1);
+  const highTotals = results.map(r => r._scoreMax ?? r._total);
+  const lowTotals = results.map(r => r._scoreMin ?? r._total);
+  const high   = Math.max(...highTotals);
+  const low    = Math.min(...lowTotals);
+  const avg    = (highTotals.reduce((a, b) => a + b, 0) / highTotals.length).toFixed(1);
   const morseOk = results.filter(r =>
     (r.scores.Q1 || 0) >= 1 && (r.scores.Q2 || 0) >= 2
   ).length;
   const morseRate = Math.round(morseOk / results.length * 100);
   const tp = bm.total_points;
+  const board = window._currentLeaderboard || getLeaderboardConfig(DEFAULT_LEADERBOARD_KEY);
+  const attemptTotal = results.reduce((sum, r) => sum + (r._attemptCount || 1), 0);
 
-  document.getElementById('stat-high').innerHTML       = `${high}<span class="stat-unit">/${tp}</span>`;
-  document.getElementById('stat-high-model').textContent = results.find(r => r._total === high)?.model || '';
+  document.getElementById('stat-high').innerHTML       = `${formatScore(high)}<span class="stat-unit">/${tp}</span>`;
+  document.getElementById('stat-high-model').textContent = results.find(r => (r._scoreMax ?? r._total) === high)?.model || '';
   document.getElementById('stat-avg').innerHTML        = `${avg}<span class="stat-unit">/${tp}</span>`;
-  document.getElementById('stat-n').textContent        = `共 ${results.length} 个模型`;
-  document.getElementById('stat-low').innerHTML        = `${low}<span class="stat-unit">/${tp}</span>`;
-  document.getElementById('stat-low-model').textContent = results.find(r => r._total === low)?.model || '';
+  document.getElementById('stat-n').textContent        = attemptTotal > results.length ? `共 ${results.length} 个模型 · ${attemptTotal} 次测试` : `共 ${results.length} 个模型`;
+  document.getElementById('stat-low').innerHTML        = `${formatScore(low)}<span class="stat-unit">/${tp}</span>`;
+  document.getElementById('stat-low-model').textContent = results.find(r => (r._scoreMin ?? r._total) === low)?.model || '';
   document.getElementById('stat-morse-rate').innerHTML = `${morseRate}<span class="stat-unit">%</span>`;
 
   const dates = results.map(r => r.test_date).sort();
   document.getElementById('meta-updated').textContent  = `最后更新：${dates[dates.length - 1] || '—'}`;
   document.getElementById('meta-total-pts').textContent = `满分 ${tp} 分 · ${bm.questions.length} 题`;
+
+  const ruleMode = document.getElementById('rule-mode');
+  if (ruleMode) {
+    ruleMode.innerHTML = board.aggregateAttempts
+      ? '<strong>Range</strong>：同一模型保留多次测试，排行榜显示区间；详情展示最高分答案。'
+      : '<strong>Global Max</strong>：每个模型不限重试次数，记录该模型在当前题集上的最高分样本。';
+  }
+  const rulePrompt = document.getElementById('rule-prompt');
+  if (rulePrompt) rulePrompt.textContent = board.promptRule;
+  const benchmarkLink = document.getElementById('footer-benchmark-link');
+  if (benchmarkLink) {
+    benchmarkLink.href = board.benchmarkUrl;
+    benchmarkLink.textContent = board.benchmarkUrl.split('/').pop();
+  }
+  const resultsLink = document.getElementById('footer-results-link');
+  if (resultsLink) {
+    resultsLink.href = board.resultsUrl;
+    resultsLink.textContent = board.resultsUrl.split('/').pop();
+  }
 }
 
 /* ── Utilities ─────────────────────────────────────── */
@@ -1915,14 +2395,18 @@ function modelDisplayName(res) {
 
 /* ── Bootstrap ─────────────────────────────────────── */
 async function main() {
+  const board = getLeaderboardConfig();
+  window._currentLeaderboard = board;
+  renderLeaderboardSwitch(board);
+
   let bm, results;
   try {
     const [bmResp, resResp] = await Promise.all([
-      fetch('data/benchmark.json', {cache: 'no-store'}),
-      fetch('data/results.json', {cache: 'no-store'}),
+      fetch(board.benchmarkUrl, {cache: 'no-store'}),
+      fetch(board.resultsUrl, {cache: 'no-store'}),
     ]);
-    if (!bmResp.ok) throw new Error(`benchmark.json HTTP ${bmResp.status}`);
-    if (!resResp.ok) throw new Error(`results.json HTTP ${resResp.status}`);
+    if (!bmResp.ok) throw new Error(`${board.benchmarkUrl} HTTP ${bmResp.status}`);
+    if (!resResp.ok) throw new Error(`${board.resultsUrl} HTTP ${resResp.status}`);
     bm = await bmResp.json();
     results = await resResp.json();
   } catch (e) {
@@ -1931,11 +2415,13 @@ async function main() {
     return;
   }
 
-  results = results.map(r => ({
+  const rawResults = results.map(r => ({
     ...r,
     _total: computeTotals(r, bm.questions),
   })).sort((a, b) => b._total - a._total);
+  results = aggregateAttempts(rawResults, !!board.aggregateAttempts);
 
+  window._rawResults = rawResults;
   window._allResults = results;
   window._familyOptions = buildFamilyOptions(results);
   window._activeFamilyKey = 'all';
@@ -1962,7 +2448,7 @@ async function main() {
     renderStats(bm, visible);
     renderLeaderboard(bm, visible);
     renderLegend(selected);
-    drawRadar(canvas, bm, selected, focusedId);
+    drawBenchmarkChart(canvas, bm, selected, focusedId);
     renderDetail(bm, focused, selected);
 
     const activeRow = document.querySelector(`tr[data-id="${focused?.id || ''}"]`);
@@ -1978,7 +2464,7 @@ async function main() {
     const activeRow = document.querySelector('tr[data-id].active');
     const activeId  = activeRow ? activeRow.dataset.id : null;
     const radarId   = (activeId && filtered.some(r => r.id === activeId)) ? activeId : null;
-    drawRadar(canvas, bm, filtered, radarId);
+    drawBenchmarkChart(canvas, bm, filtered, radarId);
     renderLegend(filtered);
     renderDetail(bm, radarId ? filtered.find(r => r.id === radarId) : filtered[0], filtered);
   };

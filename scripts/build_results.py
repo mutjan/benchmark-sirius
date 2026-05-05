@@ -42,10 +42,10 @@ def write_json(path: Path, payload: Any) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def load_benchmark() -> dict[str, Any]:
-    benchmark = load_json(BENCHMARK_PATH)
+def load_benchmark(path: Path = BENCHMARK_PATH) -> dict[str, Any]:
+    benchmark = load_json(path)
     if not isinstance(benchmark, dict):
-        raise ValidationError(f"{BENCHMARK_PATH} must contain a JSON object")
+        raise ValidationError(f"{path} must contain a JSON object")
     return benchmark
 
 
@@ -98,15 +98,15 @@ def is_number(value: Any) -> bool:
     return isinstance(value, (int, float)) and not isinstance(value, bool)
 
 
-def load_source_results() -> list[dict[str, Any]]:
-    if not SOURCE_DIR.exists():
-        raise ValidationError(f"missing source directory: {SOURCE_DIR}")
-    if not SOURCE_DIR.is_dir():
-        raise ValidationError(f"source path is not a directory: {SOURCE_DIR}")
+def load_source_results(source_dir: Path = SOURCE_DIR) -> list[dict[str, Any]]:
+    if not source_dir.exists():
+        raise ValidationError(f"missing source directory: {source_dir}")
+    if not source_dir.is_dir():
+        raise ValidationError(f"source path is not a directory: {source_dir}")
 
-    paths = sorted(SOURCE_DIR.glob("*.json"))
+    paths = sorted(source_dir.glob("*.json"))
     if not paths:
-        raise ValidationError(f"no per-model JSON files found in {SOURCE_DIR}")
+        raise ValidationError(f"no per-model JSON files found in {source_dir}")
 
     results: list[dict[str, Any]] = []
     for path in paths:
@@ -175,12 +175,17 @@ def validate_results(benchmark: dict[str, Any], results: list[dict[str, Any]]) -
             raise ValidationError(f"{rid} full_answer must be a string")
 
 
-def build(write: bool) -> list[dict[str, Any]]:
-    benchmark = load_benchmark()
-    results = load_source_results()
+def build(
+    write: bool,
+    benchmark_path: Path = BENCHMARK_PATH,
+    source_dir: Path = SOURCE_DIR,
+    output_path: Path = OUTPUT_PATH,
+) -> list[dict[str, Any]]:
+    benchmark = load_benchmark(benchmark_path)
+    results = load_source_results(source_dir)
     validate_results(benchmark, results)
     if write:
-        write_json(OUTPUT_PATH, results)
+        write_json(output_path, results)
     return results
 
 
@@ -191,10 +196,33 @@ def main() -> int:
         action="store_true",
         help="validate sources without rewriting data/results.json",
     )
+    parser.add_argument(
+        "--benchmark",
+        type=Path,
+        default=BENCHMARK_PATH,
+        help="benchmark definition JSON path",
+    )
+    parser.add_argument(
+        "--source-dir",
+        type=Path,
+        default=SOURCE_DIR,
+        help="directory containing per-model result JSON files",
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=OUTPUT_PATH,
+        help="aggregate results JSON path",
+    )
     args = parser.parse_args()
 
     try:
-        results = build(write=not args.check)
+        results = build(
+            write=not args.check,
+            benchmark_path=args.benchmark,
+            source_dir=args.source_dir,
+            output_path=args.output,
+        )
     except ValidationError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1

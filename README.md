@@ -8,13 +8,23 @@
 
 ```
 data/
-  benchmark.json   # Benchmark 定义：题目、维度、等级（稳定，少改动）
-  results/         # 单模型测评源文件：每个模型一份 JSON（人工编辑）
-  results.json     # 页面发布用聚合文件，由 scripts/build_results.py 生成
+  benchmark.json       # v2.1 自然发现版 Benchmark 定义
+  benchmark-v2.2.json  # v2.2 新 Prompt 试验版 Benchmark 定义
+  results/             # v2.1 单模型测评源文件：每个模型一份 JSON（人工编辑）
+  results-v2.2/        # v2.2 单次测评源文件；同一模型可保留多次尝试
+  results.json         # v2.1 页面发布用聚合文件，由 scripts/build_results.py 生成
+  results-v2.2.json    # v2.2 页面发布用聚合文件
 scripts/
-  build_results.py     # 合并 data/results/*.json -> data/results.json
-  validate_results.py  # 只校验单模型源文件，不改聚合文件
+  build_results.py     # 合并指定榜单源文件 -> 指定聚合文件
+  validate_results.py  # 校验 v2.1 单模型源文件，不改聚合文件
 ```
+
+当前页面支持两套榜单：
+
+| 榜单 | Prompt 类型 | Benchmark | 源文件目录 | 聚合文件 | 访问方式 |
+|------|-------------|-----------|------------|----------|----------|
+| v2.1 | 自然发现版，极简提示词 | `data/benchmark.json` | `data/results/` | `data/results.json` | `?board=v2.1` |
+| v2.2 | 新 Prompt 试验版，提示隐藏信息/结构/意象/深层含义 | `data/benchmark-v2.2.json` | `data/results-v2.2/` | `data/results-v2.2.json` | 默认页面 |
 
 ---
 
@@ -24,11 +34,12 @@ scripts/
 cd benchmark-sirius
 python3 -m http.server 8080
 # 访问 http://localhost:8080
+# 旧 v2.1 榜单： http://localhost:8080/?board=v2.1
 ```
 
 ---
 
-## 添加模型测评结果
+## 添加模型测评结果（v2.1）
 
 在 `data/results/` 下新增一个以模型 `id` 命名的文件，例如 `data/results/gpt-4o-2024-11-20.json`：
 
@@ -57,13 +68,33 @@ python3 -m http.server 8080
     "Q13": 1,
     "Q14": 1,
     "Q15": 1
-  }
+  },
+  "answers": {
+    "Q1": {"snippet": "识别歌词点划序列为摩斯电码。"},
+    "Q2": {"snippet": "逐组解码为 I LOVE YOU。"},
+    "Q3": {"snippet": "识别 ずっと 双关。"},
+    "Q4": {"snippet": "示例：必须覆盖到 Q15，每题一个非空 snippet。"},
+    "Q5": {"snippet": "示例。"},
+    "Q6": {"snippet": "示例。"},
+    "Q7": {"snippet": "示例。"},
+    "Q8": {"snippet": "示例。"},
+    "Q9": {"snippet": "示例。"},
+    "Q10": {"snippet": "示例。"},
+    "Q11": {"snippet": "示例。"},
+    "Q12": {"snippet": "示例。"},
+    "Q13": {"snippet": "示例。"},
+    "Q14": {"snippet": "示例。"},
+    "Q15": {"snippet": "示例。"}
+  },
+  "full_answer": "模型原始完整回答文本。"
 }
 ```
 
 **字段说明**
 - `id` — 唯一标识符，不能重复，并且必须与文件名一致
 - `scores` — 各题得分，必须覆盖所有题目（Q1–Q15），允许小数（如 `1.5`、`0.5`、`0.75`）；0 分写 `0`，不可省略
+- `answers` — 各题评分摘录，必须覆盖 Q1–Q15；每题至少包含非空 `snippet`
+- `full_answer` — 模型原始完整回答，页面“完整答案”弹窗使用
 
 更新后先校验，再生成页面读取的聚合文件：
 
@@ -74,11 +105,45 @@ python3 scripts/build_results.py
 
 刷新页面即可看到新模型出现在排行榜和雷达图中。不要手动编辑 `data/results.json`；它是发布产物。
 
+## 添加模型测评结果（v2.2）
+
+新 Prompt 试验版使用独立目录和聚合文件，避免与 v2.1 混排。v2.2 榜单会把同一模型的多次尝试合并成一行，排行榜展示得分区间，得分详情、雷达图和完整答案仍使用该模型的最高分答案。
+
+1. 在 `data/results-v2.2/` 下新增同样结构的模型 JSON。每次尝试都必须有唯一 `id` 和文件名；同一模型的多次尝试请保持 `model`、`model_version`、`provider`、`api_endpoint` 一致，页面会按这些字段聚合。
+2. 使用 v2.2 的 benchmark 和输出路径构建：
+
+```bash
+python3 scripts/build_results.py \
+  --check \
+  --benchmark data/benchmark-v2.2.json \
+  --source-dir data/results-v2.2 \
+  --output data/results-v2.2.json
+
+python3 scripts/build_results.py \
+  --benchmark data/benchmark-v2.2.json \
+  --source-dir data/results-v2.2 \
+  --output data/results-v2.2.json
+```
+
+访问 `http://localhost:8080` 或页面顶部“榜单版本”切换入口查看新榜单。
+
+重复测试的文件名示例：
+
+```text
+data/results-v2.2/glm-5.1__run-2026-05-04-a.json
+data/results-v2.2/glm-5.1__run-2026-05-04-b.json
+```
+
+如果两份记录聚合后分数分别为 `15.5` 和 `15.75`，排行榜显示 `15.5–15.75`；点击详情时只展示 `15.75` 那份答案和各题摘录。
+
 ---
 
 ## 评分规则（questions）
 
-每道题的评分定义在 `data/benchmark.json` → `questions` 数组中：
+每道题的评分定义在对应榜单的 benchmark 文件 → `questions` 数组中：
+
+- v2.1：`data/benchmark.json`
+- v2.2：`data/benchmark-v2.2.json`
 
 ```json
 {
@@ -104,7 +169,7 @@ python3 scripts/build_results.py
 | Q1 | 摩斯识别 | 1 | cipher | 识别摩斯电码 |
 | Q2 | I LOVE YOU 解码 | 2 | cipher | 解码得到 I LOVE YOU |
 | Q3 | ずっと 元语言密钥 | 1 | meta | 发现 ずっと 双关 |
-| Q4 | 表层语义与悼亡 | 1 | language | 明かりになったあなた、动作感知与悼亡关系 |
+| Q4 | 表层语义与远离 | 1 | language | 明かりになったあなた、动作感知与远离/化光关系 |
 | Q5 | 主歌情感递进 | 1 | language | 主歌三组变化与心理轨迹 |
 | Q6 | 副歌空间与心脏递进 | 1 | language | 副歌两条递进轴与回环 |
 | Q7 | 信号-心脏结构 | 3 | signal | 点滅、摩斯、星光、心跳构成信号收发 |
@@ -112,10 +177,10 @@ python3 scripts/build_results.py
 | Q9 | 信号延迟与存在不确定性 | 2 | signal | 旧光、延迟确认与回信不确定 |
 | Q10 | 天狼星基础意象 | 1 | astronomy | 天狼星身份、距离、观测特征与歌词对应 |
 | Q11 | 双星/白矮星事实 | 2 | astronomy | Sirius A/B 与白矮星核心 |
-| Q12 | 双星引力与双向等待 | 2 | astronomy | 双星绕行、引力束缚与双向等待 |
+| Q12 | 双星引力与平等等待 | 2 | astronomy | 双星绕行、引力束缚与平等双向关系 |
 | Q13 | 发布时间/时代语境 | 1 | temporal | 发布时间的季节、年末与时代语境 |
 | Q14 | 精确观测/轨道推理 | 1 | temporal | Sirius AB 轨道或具体当夜观测推理 |
-| Q15 | 额外自洽洞察 | 1 | bonus | 标准答案外的自洽新得分点 |
+| Q15 | 额外自洽洞察 | 1 | bonus | 标准答案外的新颖、证据化、解释性洞察 |
 
 总分：**22 分**
 
@@ -123,7 +188,7 @@ python3 scripts/build_results.py
 
 ## 维度定义（dimensions）
 
-维度在 `data/benchmark.json` → `dimensions` 数组中定义，用于雷达图和分类统计：
+维度在对应 benchmark 文件 → `dimensions` 数组中定义，用于雷达图和分类统计：
 
 ```json
 {
@@ -156,7 +221,7 @@ python3 scripts/build_results.py
 
 ## 等级划分（tiers）
 
-等级定义在 `data/benchmark.json` → `tiers` 数组中，按总分区间显示徽章：
+等级定义在对应 benchmark 文件 → `tiers` 数组中，按总分区间显示徽章：
 
 ```json
 { "min": 19, "max": 22, "label": "完整解读", "description": "..." }
@@ -168,7 +233,7 @@ python3 scripts/build_results.py
 
 ## JSON 特殊字符转义规范
 
-`data/benchmark.json`、`data/results/*.json` 和生成后的 `data/results.json` 均为标准 JSON，**所有字符串值必须合法转义**，否则页面会静默白屏或数据丢失。
+`data/benchmark*.json`、`data/results*/**.json` 和生成后的 `data/results*.json` 均为标准 JSON，**所有字符串值必须合法转义**，否则页面会静默白屏或数据丢失。
 
 ### 常见踩坑
 
@@ -187,24 +252,40 @@ python3 scripts/build_results.py
 python3 -m json.tool data/benchmark.json > /dev/null && echo "OK"
 python3 -m json.tool data/results.json  > /dev/null && echo "OK"
 python3 scripts/validate_results.py
+
+# v2.2
+python3 -m json.tool data/benchmark-v2.2.json > /dev/null && echo "OK"
+python3 -m json.tool data/results-v2.2.json  > /dev/null && echo "OK"
+python3 scripts/build_results.py --check --benchmark data/benchmark-v2.2.json --source-dir data/results-v2.2 --output data/results-v2.2.json
 ```
 
 如果前两条输出 `OK`、校验脚本输出 `validated ... result files`，说明文件合法；否则会打印出错位置，定位修复后再刷新页面。
 
 ---
 
-## 雷达图（星图）操作说明
+## 图表操作说明
 
-雷达图展示所有模型在全部维度上的得分。
+页面右侧图表会随榜单版本切换：
 
-**默认状态**：全量显示所有模型，各自用独立颜色实线绘制，顶点有发光圆点。
+- v2.1：雷达图展示所有模型在全部维度上的得分。
+- v2.2：纵向 Box Plot / 分布图展示同一模型多次测试的总分稳定性，纵轴越高代表分数越高。
+
+v2.2 分布图规则：
+
+- `1` 条记录：显示一条横线和单次分数。
+- `2–4` 条记录：显示最低分、最高分连线和中位数点。
+- `≥5` 条记录：显示正式 Box Plot（min、Q1、median、Q3、max）。
+
+因此 `5` 条记录是进入 Box Plot 的最低样本数；少于 `5` 条仍可展示波动，但页面会用更轻量的摘要形态。
+
+**默认状态**：全量显示当前筛选范围内的已选模型，各自使用独立颜色。
 
 **交互**：
-- 点击排行榜中的某模型 → 该模型高亮，其余模型降至 45% 透明度并改为虚线轮廓
+- 点击排行榜中的某模型 → 该模型高亮，其余模型弱化显示
 - 再次点击同一模型（或点击空白处）→ 恢复全量显示
 
-**更新雷达图轴（维度变更）**：
-1. 修改 `data/benchmark.json` → `dimensions` 数组（增删维度或改 `label`）
+**更新 v2.1 雷达图轴（维度变更）**：
+1. 修改对应 benchmark 文件 → `dimensions` 数组（增删维度或改 `label`）
 2. 同步修改 `questions[].dimension` 字段，确保每道题映射到存在的维度 key
 3. 同步更新每个维度的 `max`（= 所含题目 max 之和）和顶层 `total_points`
 4. 运行 JSON 合法性验证，刷新页面即生效
